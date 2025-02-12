@@ -91,9 +91,8 @@ class board:
             self.grid[:, 2, 2] = -1
             self.aspect_ratio = [1, 1.35, 0.55]
 
-    def draw_board(self, title_string):
-        # grid_t = self.grid.transpose((2,1,0))
-        grid_t = np.rot90(np.rot90(self.grid, k=1, axes=(0, 2)), k=3, axes=(0, 1))
+    def draw_board(self, title_string, rotation=3):
+        grid_t = np.rot90(np.rot90(self.grid, k=1, axes=(0, 2)), k=rotation, axes=(0, 1))
         grid_t = np.where(grid_t == -1, 0, grid_t)
 
         color = []
@@ -357,13 +356,22 @@ def play_turn(turn, players, grid):
         if piece_name is None:
             title_string = f'Player {player_num} Maxed Out Attempts'
             ax = grid.draw_board(title_string)
+            ax_90 = grid.draw_board(title_string, rotation=2)
+            ax_180 = grid.draw_board(title_string, rotation=1)
+            ax_270 = grid.draw_board(title_string, rotation=0)
         else:
             title_string = f'Player {player_num} Turn {turn + 1}: {piece_name}'
             ax = grid.draw_board(title_string)
+            ax_90 = grid.draw_board(title_string, rotation=2)
+            ax_180 = grid.draw_board(title_string, rotation=1)
+            ax_270 = grid.draw_board(title_string, rotation=0)
     if (player.still_playing is True) and (len(player.piece_list)) == 0:
         title_string = f'Player {player_num} Out of Pieces'
         ax = grid.draw_board(title_string)
+        ax_90 = grid.draw_board(title_string, rotation=2)
+        ax_180 = grid.draw_board(title_string, rotation=1)
+        ax_270 = grid.draw_board(title_string, rotation=0)
         player.still_playing = False
 
-    return players, grid, ax
+    return players, grid, ax, ax_90, ax_180, ax_270
 

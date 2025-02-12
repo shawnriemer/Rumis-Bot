@@ -13,32 +13,33 @@
 <form action="/", method="POST">
 <div class="menu">
     <div>
-        <label class="sim-button" for="n">Runs:<br></label>
-        <input id="n" value={{ n }} min="1" max="100" onfocus="this.value=''" name="none_n">
+        <label class="sim-button" for="n">Game Board:<br></label>
+<!--        <input id="n" value={{ n }} min="1" max="100" onfocus="this.value=''" name="none_n">-->
+        <input id="n" value='chullpa' onfocus="this.value=''" name="none_n">
     </div>
 </div>
-    <br><button type="submit">re-run simulations</button>
+    <br><button type="submit">Start new game</button>
 </form>
 
 
 
-<img id='gameBoard' src={{ url_for('static', filename='test.png') }}>
+<img id='gameBoard' src={{ url_for('static', filename='test_0.png') }}>
 
 
-
-<button>Click me</button>
 
 <br>
 
-<input type="text" id="input">
-<button id="testbruh">Send Data</button>
-<div id="output"></div>
+<!--<input type="text" id="input">-->
+<!--<button id="testbruh">Send Data</button>-->
 
 <br>
 
 <input type="text" id="input2">
 <button id="nextTurn">Next Turn</button>
+<div id="output"></div>
 
+
+<button id="rotate">Rotate</button>
 
 </body>
 </html>

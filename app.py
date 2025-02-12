@@ -14,12 +14,15 @@ def hello():
     if request.method == "POST":
         board_name = request.form.get("none_n")
         players, grid = start_game(4, board_name)
-        players, grid, ax = play_turn(session['turn'], players, grid)
+        players, grid, ax, ax_90, ax_180, ax_270 = play_turn(session['turn'], players, grid)
 
         session['players'] = jsonpickle.encode(players)
         session['grid'] = jsonpickle.encode(grid)
 
-        ax.figure.savefig('static//test.png', format='png')
+        ax.figure.savefig('static//test_0.png', format='png')
+        ax_90.figure.savefig('static//test_90.png', format='png')
+        ax_180.figure.savefig('static//test_180.png', format='png')
+        ax_270.figure.savefig('static//test_270.png', format='png')
     return render_template('index.html')
 
 
@@ -41,11 +44,14 @@ def nextTurn():
 
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
-    players, grid, ax = play_turn(session['turn'], players, grid)
+    players, grid, ax, ax_90, ax_180, ax_270 = play_turn(session['turn'], players, grid)
     session['players'] = jsonpickle.encode(players)
     session['grid'] = jsonpickle.encode(grid)
 
-    ax.figure.savefig('static//test.png', format='png')
+    ax.figure.savefig('static//test_0.png', format='png')
+    ax_90.figure.savefig('static//test_90.png', format='png')
+    ax_180.figure.savefig('static//test_180.png', format='png')
+    ax_270.figure.savefig('static//test_270.png', format='png')
     return jsonify({'turn': session['turn']})  # return the result to JavaScript
 
 
