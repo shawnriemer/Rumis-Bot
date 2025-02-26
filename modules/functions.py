@@ -8,16 +8,20 @@ import base64
 from io import BytesIO
 
 
-class competitor:
+class Competitor:
     def __init__(self, owner, number, color):
         self.owner = owner
         self.number = number
         self.color = color
         self.still_playing = True
         self.piece_list = [
-            self.number * np.array([[[1,1,1,1]], [[0,0,0,0]]]),
-            self.number * np.array([[[1,1,1]], [[0,0,0]]]),
-            self.number * np.array([[[1,1]], [[0,0]]]),
+            # self.number * np.array([[[1,1,1,1]], [[0,0,0,0]]]),
+            self.number * np.array([[[1, 1, 1, 1]]]),
+            # self.number * np.array([[[1,1,1]], [[0,0,0]]]),
+            self.number * np.array([[[1, 1, 1]]]),
+            # self.number * np.array([[[1,1]], [[0,0]]]),
+            self.number * np.array([[[1, 1]]]),
+            # TODO: fix rest of pieces
             self.number * np.array([[[1,0,0], [1,1,1]], [[0,0,0],[0,0,0]]]),
             self.number * np.array([[[1,1],[1,1]], [[0,0],[0,0]]]),
             self.number * np.array([[[1, 0],[1, 1]], [[0, 0],[0, 0]]]),
@@ -28,7 +32,7 @@ class competitor:
             self.number * np.array([[[0,1],[1,1]], [[0,0],[1,0]]])
         ]
         self.piece_names_list = [
-            '4x1','3x1','2x1','L','square','corner','pipe','bend','archer','twistL','twistR'
+            '4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR'
         ]
 
 
@@ -286,10 +290,10 @@ def play_move(player, grid, start, turn_2):
 
 
 def play_game(num_players, board_name):
-    p1 = competitor('cp', 1, 'yellow')
-    p2 = competitor('cp', 2, 'red')
-    p3 = competitor('cp', 3, 'blue')
-    p4 = competitor('human', 4, 'green')
+    p1 = Competitor('cp', 1, 'yellow')
+    p2 = Competitor('cp', 2, 'red')
+    p3 = Competitor('cp', 3, 'blue')
+    p4 = Competitor('human', 4, 'green')
     players = {1: p1, 2: p2, 3: p3, 4: p4}
 
     grid = board(board_name)
@@ -328,10 +332,10 @@ def play_game(num_players, board_name):
 
 
 def start_game(num_players, board_name):
-    p1 = competitor('cp', 1, 'yellow')
-    p2 = competitor('cp', 2, 'red')
-    p3 = competitor('cp', 3, 'blue')
-    p4 = competitor('cp', 4, 'green')
+    p1 = Competitor('cp', 1, 'yellow')
+    p2 = Competitor('cp', 2, 'red')
+    p3 = Competitor('cp', 3, 'blue')
+    p4 = Competitor('cp', 4, 'green')
     players = {'1': p1, '2': p2, '3': p3, '4': p4}
     grid = board(board_name)
     return players, grid

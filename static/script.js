@@ -44,14 +44,18 @@
 document.getElementById("nextTurn").addEventListener("click", nextTurn);
 
 function nextTurn() {
-    var value = document.getElementById('input2').value;
+
+    var image = document.getElementById("gameBoard");
+    image.src = 'static/loading.gif'
+
+    // var value = document.getElementById('input2').value;
 
     fetch('/nextturn', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 'value': value })
+        body: JSON.stringify({ 'value': 2 })
         }
     )
     .then((response) => {
