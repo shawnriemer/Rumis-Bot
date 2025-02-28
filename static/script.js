@@ -48,14 +48,17 @@ function nextTurn() {
     var image = document.getElementById("gameBoard");
     image.src = 'static/loading.gif'
 
-    // var value = document.getElementById('input2').value;
+    var piece = document.getElementById('piece').value;
+    var x = document.getElementById('x').value;
+    var y = document.getElementById('y').value;
+    var z = document.getElementById('z').value;
 
     fetch('/nextturn', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 'value': 2 })
+        body: JSON.stringify({ 'piece': piece, 'x': x, 'y': y, 'z': z })
         }
     )
     .then((response) => {
@@ -92,4 +95,32 @@ function rotate(){
     } else if (image.src.includes('_270')) {
         image.src = image.src.replace('_270', '_0')
     }
+}
+
+// Update visual of all playable pieces
+document.getElementById("move_right").addEventListener("click", moveRight);
+
+function moveRight() {
+
+    fetch('/movePiece', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'move': 'right' })
+            }
+    )
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then((data) => {
+        var timestamp = new Date().getTime();
+        // Loop through array of each piece
+        var image = document.getElementById("4x1");
+        image.src = `static/4x1.png?t=${timestamp}`
+    });
+
 }

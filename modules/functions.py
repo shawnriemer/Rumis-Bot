@@ -35,6 +35,36 @@ class Competitor:
             '4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR'
         ]
 
+    def draw_pieces(self, grid, x=0, y=0, z=0):
+        ax = plt.figure(figsize=(3.2, 2.4)).add_subplot(projection='3d')
+        for piece, piece_name in zip(self.piece_list, self.piece_names_list):
+            empty_grid = board('chullpa')  # TODO: hardcoded
+            layer = fill_out2(piece, empty_grid.grid, x, y, z)
+            piece_grid = empty_grid.grid + layer
+
+            color = []
+            for i, layer in enumerate(piece_grid):
+                for j, row in enumerate(layer):
+                    for k, val in enumerate(row):
+                        if val == 0:
+                            color.append('none')
+                        elif val == 1:
+                            color.append('yellow')
+                        elif val == 2:
+                            color.append('red')
+                        elif val == 3:
+                            color.append('blue')
+                        elif val == 4:
+                            color.append('green')
+            df = pd.DataFrame({'color': color})
+            plt.cla()
+            ax.voxels(piece_grid, facecolors=np.array(df.color).reshape(piece_grid.shape), edgecolor='k')
+            ax.set_box_aspect(grid.aspect_ratio)
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+            ax.set_zticklabels([])
+            ax.figure.savefig(f'static//{piece_name}.png', format='png')
+
 
 class board:
     def __init__(self, board):
@@ -236,8 +266,8 @@ def check_nothanging(grid, layer, player):
 def play_move(player, grid, start, turn_2):
     attempt_counter = 0
 
-    if player.owner == 'human':
-        a = input('piece')
+    # if player.owner == 'human':
+    #     a = input('piece')
 
     while True:
 
@@ -245,7 +275,7 @@ def play_move(player, grid, start, turn_2):
         piece_i = random.randint(0, len(player.piece_list) - 1)
         piece = player.piece_list[piece_i]
 
-        # Randomly rotate piece and place it's location
+        # Randomly rotate piece and place its location
         oriented_piece = orient(piece)
         layer = fill_out(oriented_piece, grid.grid)
 
@@ -287,6 +317,39 @@ def play_move(player, grid, start, turn_2):
         if attempt_counter == 5000:
             player.still_playing = False
             return grid, None
+
+
+def human_move(players, grid, piece_i, x, y, z):
+    player = players[str(2)]  # TODO: hardcoded
+    piece = player.piece_list[piece_i]
+    piece_name = player.piece_names_list[piece_i]
+    layer = fill_out2(piece, grid.grid, x, y, z)
+    grid.grid += layer
+    title_string = f'Player {2} Turn {2}: {piece_name}'  # TODO: hardcoded
+    ax = grid.draw_board(title_string)
+    ax_90 = grid.draw_board(title_string, rotation=2)
+    ax_180 = grid.draw_board(title_string, rotation=1)
+    ax_270 = grid.draw_board(title_string, rotation=0)
+    return players, grid, ax, ax_90, ax_180, ax_270
+
+
+def fill_out2(piece, grid, row, col, stack):
+    n_layers, n_rows, n_columns = grid.shape
+    stacks, rows, cols = piece.shape
+
+    stack_max_start = n_layers - stacks
+    row_max_start = n_rows - rows
+    col_max_start = n_columns - cols
+
+    stack_top_pad = stack
+    stack_bottom_pad = stack_max_start - stack
+    row_top_pad = row
+    row_bottom_pad = row_max_start - row
+    col_left_pad = col
+    col_right_pad = col_max_start - col
+
+    return np.pad(piece,
+                  ((stack_top_pad, stack_bottom_pad), (row_top_pad, row_bottom_pad), (col_left_pad, col_right_pad)))
 
 
 def play_game(num_players, board_name):
@@ -333,18 +396,19 @@ def play_game(num_players, board_name):
 
 def start_game(num_players, board_name):
     p1 = Competitor('cp', 1, 'yellow')
-    p2 = Competitor('cp', 2, 'red')
+    p2 = Competitor('human', 2, 'red')
     p3 = Competitor('cp', 3, 'blue')
     p4 = Competitor('cp', 4, 'green')
     players = {'1': p1, '2': p2, '3': p3, '4': p4}
     grid = board(board_name)
+    p2.draw_pieces(grid)  # TODO: hardcoded
     return players, grid
 
 
 def play_turn(turn, players, grid):
 
     # Figure out whose turn it is and get their available pieces
-    num_players = 4  # hard coded
+    num_players = 4  # TODO: hard coded
     player_num = (turn % num_players) + 1
     print(f"player_num: {player_num}")
     player = players[str(player_num)]

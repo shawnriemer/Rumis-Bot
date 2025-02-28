@@ -43,8 +43,44 @@
 <button id="rotate">Rotate</button>
 
 <br><br>
-<input type="text" id="piece">
-<button id="playPiece">Play Piece</button>
+
+<form action="/", method="POST">
+<div class="menu">
+    <div>
+        <label for="piece">Piece:</label>
+        <input type="text" id="piece">
+        <label for="x">x:</label>
+        <input type="text" id="x">
+        <label for="y">y:</label>
+        <input type="text" id="y">
+        <label for="z">z:</label>
+        <input type="text" id="z">
+    </div>
+</div>
+    <br><button type="submit">Play Piece</button>
+</form>
+
+<br><br>
+
+<button type="submit" id="move_left">Move Left</button>
+<button type="submit" id="move_right">Move Right</button>
+<button type="submit" id="move_away">Move Away</button>
+<button type="submit" id="move_towards">Move Towards</button>
+<button type="submit" id="move_up">Move Up</button>
+<button type="submit" id="move_down">Move Down</button>
+
+<img id='2x1' src={{ url_for('static', filename='2x1.png') }}>
+<img id='3x1' src={{ url_for('static', filename='3x1.png') }}>
+<img id='4x1' src={{ url_for('static', filename='4x1.png') }}>
+<img id='archer' src={{ url_for('static', filename='archer.png') }}>
+<img id='bend' src={{ url_for('static', filename='bend.png') }}>
+<img id='corner' src={{ url_for('static', filename='corner.png') }}>
+<img id='L' src={{ url_for('static', filename='L.png') }}>
+<img id='pipe' src={{ url_for('static', filename='pipe.png') }}>
+<img id='square' src={{ url_for('static', filename='square.png') }}>
+<img id='twistL' src={{ url_for('static', filename='twistL.png') }}>
+<img id='twistR' src={{ url_for('static', filename='twistR.png') }}>
+
 
 </body>
 </html>
