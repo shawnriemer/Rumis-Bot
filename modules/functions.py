@@ -15,11 +15,8 @@ class Competitor:
         self.color = color
         self.still_playing = True
         self.piece_list = [
-            # self.number * np.array([[[1,1,1,1]], [[0,0,0,0]]]),
             self.number * np.array([[[1, 1, 1, 1]]]),
-            # self.number * np.array([[[1,1,1]], [[0,0,0]]]),
             self.number * np.array([[[1, 1, 1]]]),
-            # self.number * np.array([[[1,1]], [[0,0]]]),
             self.number * np.array([[[1, 1]]]),
             # TODO: fix rest of pieces
             self.number * np.array([[[1,0,0], [1,1,1]], [[0,0,0],[0,0,0]]]),
@@ -34,6 +31,7 @@ class Competitor:
         self.piece_names_list = [
             '4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR'
         ]
+        self.piece_profile_positions = (0, 0, 0)
 
     def draw_pieces(self, grid, x=0, y=0, z=0):
         ax = plt.figure(figsize=(3.2, 2.4)).add_subplot(projection='3d')
@@ -41,6 +39,7 @@ class Competitor:
             empty_grid = board('chullpa')  # TODO: hardcoded
             layer = fill_out2(piece, empty_grid.grid, x, y, z)
             piece_grid = empty_grid.grid + layer
+            piece_grid = np.rot90(piece_grid, k=1, axes=(0, 2))
 
             color = []
             for i, layer in enumerate(piece_grid):
@@ -321,7 +320,12 @@ def play_move(player, grid, start, turn_2):
 
 def human_move(players, grid, piece_i, x, y, z):
     player = players[str(2)]  # TODO: hardcoded
+
+    piece_i = player.piece_names_list.index(piece_i)
     piece = player.piece_list[piece_i]
+    x, y, z = player.piece_profile_positions
+    print(x, y, z)
+
     piece_name = player.piece_names_list[piece_i]
     layer = fill_out2(piece, grid.grid, x, y, z)
     grid.grid += layer
