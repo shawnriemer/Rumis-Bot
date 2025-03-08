@@ -39,7 +39,8 @@ class Competitor:
             empty_grid = board('chullpa')  # TODO: hardcoded
             layer = fill_out2(piece, empty_grid.grid, x, y, z)
             piece_grid = empty_grid.grid + layer
-            piece_grid = np.rot90(piece_grid, k=1, axes=(0, 2))
+            # piece_grid = np.rot90(piece_grid, k=1, axes=(0, 2))
+            piece_grid = np.rot90(np.rot90(piece_grid, k=1, axes=(0, 2)), k=3, axes=(0, 1))
 
             color = []
             for i, layer in enumerate(piece_grid):
@@ -318,7 +319,7 @@ def play_move(player, grid, start, turn_2):
             return grid, None
 
 
-def human_move(players, grid, piece_i, x, y, z):
+def human_move(players, grid, piece_i):
     player = players[str(2)]  # TODO: hardcoded
 
     piece_i = player.piece_names_list.index(piece_i)

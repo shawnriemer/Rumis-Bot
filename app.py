@@ -10,6 +10,7 @@ app.secret_key = '234897f134951'  # Required to use session
 
 @app.route('/', methods=['GET', 'POST'])
 def hello():
+    session.clear()
     session['turn'] = 0
     if request.method == "POST":
         board_name = request.form.get("none_n")
@@ -43,7 +44,7 @@ def nextTurn():
         players, grid, ax, ax_90, ax_180, ax_270 = play_turn(session['turn'], players, grid)
     else:
         # players, grid, ax, ax_90, ax_180, ax_270 = human_move(players, grid, int(data['piece']), int(data['x']), int(data['y']), int(data['z']))
-        players, grid, ax, ax_90, ax_180, ax_270 = human_move(players, grid, data['piece'], int(data['x']), int(data['y']), int(data['z']))
+        players, grid, ax, ax_90, ax_180, ax_270 = human_move(players, grid, data['piece'])
 
     # Reset profile places for each player
     for player in players.values():
@@ -62,6 +63,7 @@ def nextTurn():
 
 @app.route('/movePiece', methods=['POST'])
 def move_piece():
+    print('app.py move_piece()')
     data = request.get_json()
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
@@ -69,13 +71,13 @@ def move_piece():
     if move == 'right':
         for player in players.values():
             current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x, current_y, current_z + 1)
-        players[str(2)].draw_pieces(grid, current_x, current_y, current_z + 1)  # TODO: hardcoded
+            player.piece_profile_positions = (current_x, current_y + 1, current_z)
+        players[str(2)].draw_pieces(grid, current_x, current_y + 1, current_z)  # TODO: hardcoded
     elif move == 'left':
         for player in players.values():
             current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x, current_y, current_z - 1)
-        players[str(2)].draw_pieces(grid, current_x, current_y, current_z - 1)  # TODO: hardcoded
+            player.piece_profile_positions = (current_x, current_y - 1, current_z)
+        players[str(2)].draw_pieces(grid, current_x, current_y - 1, current_z)  # TODO: hardcoded
     elif move == 'away':
         for player in players.values():
             current_x, current_y, current_z = player.piece_profile_positions
@@ -89,13 +91,13 @@ def move_piece():
     elif move == 'up':
         for player in players.values():
             current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x, current_y + 1, current_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y + 1, current_z)  # TODO: hardcoded
+            player.piece_profile_positions = (current_x, current_y, current_z + 1)
+        players[str(2)].draw_pieces(grid, current_x, current_y, current_z + 1)  # TODO: hardcoded
     elif move == 'down':
         for player in players.values():
             current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x, current_y - 1, current_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y - 1, current_z)  # TODO: hardcoded
+            player.piece_profile_positions = (current_x, current_y, current_z - 1)
+        players[str(2)].draw_pieces(grid, current_x, current_y, current_z - 1)  # TODO: hardcoded
 
     session['players'] = jsonpickle.encode(players)
 

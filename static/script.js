@@ -42,24 +42,22 @@
 
 // Iterate through Rumis turns
 document.getElementById("nextTurn").addEventListener("click", nextTurn);
-document.getElementById("next_turn_2x1").addEventListener("click", nextTurn_2x1);
-
 function nextTurn() {
 
     var image = document.getElementById("gameBoard");
     image.src = 'static/loading.gif'
 
-    var piece = document.getElementById('piece').value;
-    var x = document.getElementById('x').value;
-    var y = document.getElementById('y').value;
-    var z = document.getElementById('z').value;
+//    var piece = document.getElementById('piece').value;
+//    var x = document.getElementById('x').value;
+//    var y = document.getElementById('y').value;
+//    var z = document.getElementById('z').value;
 
     fetch('/nextturn', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 'piece': piece, 'x': x, 'y': y, 'z': z })
+        body: JSON.stringify({ 'piece': 'placeholder' })
         }
     )
     .then((response) => {
@@ -79,19 +77,32 @@ function nextTurn() {
 
 }
 
-function nextTurn_2x1() {
+// Play human's turn
+const pieces = ['4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR']
+for (const piece of pieces) {
+    document.getElementById(`next_turn_${piece}`).addEventListener("click", nextTurn_human);
+    document.getElementById(`next_turn_${piece}`).myParam = piece
+}
+
+//document.getElementById("next_turn_2x1").addEventListener("click", nextTurn_3x1);
+//document.getElementById("next_turn_2x1").myParam = '2x1'
+//
+//document.getElementById("next_turn_3x1").addEventListener("click", nextTurn_3x1);
+//document.getElementById("next_turn_3x1").myParam = '3x1'
+//
+//document.getElementById("next_turn_4x1").addEventListener("click", nextTurn_3x1);
+//document.getElementById("next_turn_4x1").myParam = '4x1'
+
+function nextTurn_human(evt) {
     var image = document.getElementById("gameBoard");
     image.src = 'static/loading.gif'
-    var piece = document.getElementById('piece').value;
-    var x = document.getElementById('x').value;
-    var y = document.getElementById('y').value;
-    var z = document.getElementById('z').value;
+    var piece = evt.currentTarget.myParam
     fetch('/nextturn', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 'piece': '2x1', 'x': x, 'y': y, 'z': z })
+        body: JSON.stringify({ 'piece': piece })
         }
     )
     .then((response) => {
@@ -128,6 +139,7 @@ function rotate(){
         image.src = image.src.replace('_270', '_0')
     }
 }
+
 
 // Update visual of all playable pieces  # TODO: there has to be a better way to do this
 document.getElementById("move_right").addEventListener("click", moveRight);
