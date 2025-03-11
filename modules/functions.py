@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import random
+import shutil
 import plotly.express as px
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
@@ -19,51 +20,60 @@ class Competitor:
             self.number * np.array([[[1, 1, 1]]]),
             self.number * np.array([[[1, 1]]]),
             # TODO: fix rest of pieces
-            self.number * np.array([[[1,0,0], [1,1,1]], [[0,0,0],[0,0,0]]]),
-            self.number * np.array([[[1,1],[1,1]], [[0,0],[0,0]]]),
-            self.number * np.array([[[1, 0],[1, 1]], [[0, 0],[0, 0]]]),
-            self.number * np.array([[[0,1,0],[1,1,1]], [[0,0,0],[0,0,0]]]),
-            self.number * np.array([[[0,1,1],[1,1,0]], [[0,0,0],[0,0,0]]]),
-            self.number * np.array([[[1,0],[1,1]], [[0,0],[1,0]]]),
-            self.number * np.array([[[1,0],[1,1]], [[0,0],[0,1]]]),
-            self.number * np.array([[[0,1],[1,1]], [[0,0],[1,0]]])
+            self.number * np.array([[[1, 0, 0], [1, 1, 1]]]),
+            self.number * np.array([[[1, 1], [1, 1]]]),
+            self.number * np.array([[[1, 0], [1, 1]]]),
+            self.number * np.array([[[0, 1, 0], [1, 1, 1]]]),
+            self.number * np.array([[[0, 1, 1], [1, 1, 0]]]),
+            self.number * np.array([[[1, 0], [1, 1]], [[0, 0], [1, 0]]]),
+            self.number * np.array([[[1, 0], [1, 1]], [[0, 0], [0, 1]]]),
+            self.number * np.array([[[0, 1], [1, 1]], [[0, 0], [1, 0]]])
         ]
         self.piece_names_list = [
             '4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR'
         ]
-        self.piece_profile_positions = (0, 0, 0)
+        self.piece_profile_positions = (0, 0, 0, 0, 0, 0)
 
-    def draw_pieces(self, grid, x=0, y=0, z=0):
+    def draw_pieces(self, grid, x=0, y=0, z=0, k1=0, k2=0, k3=0):
         ax = plt.figure(figsize=(3.2, 2.4)).add_subplot(projection='3d')
         for piece, piece_name in zip(self.piece_list, self.piece_names_list):
             empty_grid = board('chullpa')  # TODO: hardcoded
-            layer = fill_out2(piece, empty_grid.grid, x, y, z)
-            piece_grid = empty_grid.grid + layer
-            # piece_grid = np.rot90(piece_grid, k=1, axes=(0, 2))
-            piece_grid = np.rot90(np.rot90(piece_grid, k=1, axes=(0, 2)), k=3, axes=(0, 1))
+            piece = np.rot90(np.rot90(np.rot90(piece, k=k1, axes=(0, 1)), k=k2, axes=(1, 2)), k=k3, axes=(0, 2))
+            # If a voxel can't be made then give up on that piece
+            try:
+                layer = fill_out2(piece, empty_grid.grid, x, y, z)
+                # piece_grid = empty_grid.grid + layer
+                piece_grid = grid.grid + layer
+                # Match up to how it's graphed
+                piece_grid = np.rot90(np.rot90(piece_grid, k=1, axes=(0, 2)), k=3, axes=(0, 1))
 
-            color = []
-            for i, layer in enumerate(piece_grid):
-                for j, row in enumerate(layer):
-                    for k, val in enumerate(row):
-                        if val == 0:
-                            color.append('none')
-                        elif val == 1:
-                            color.append('yellow')
-                        elif val == 2:
-                            color.append('red')
-                        elif val == 3:
-                            color.append('blue')
-                        elif val == 4:
-                            color.append('green')
-            df = pd.DataFrame({'color': color})
-            plt.cla()
-            ax.voxels(piece_grid, facecolors=np.array(df.color).reshape(piece_grid.shape), edgecolor='k')
-            ax.set_box_aspect(grid.aspect_ratio)
-            ax.set_xticklabels([])
-            ax.set_yticklabels([])
-            ax.set_zticklabels([])
-            ax.figure.savefig(f'static//{piece_name}.png', format='png')
+                color = []
+                for i, layer in enumerate(piece_grid):
+                    for j, row in enumerate(layer):
+                        for k, val in enumerate(row):
+                            if val == 0:
+                                color.append('none')
+                            elif val == 1:
+                                color.append('yellow')
+                            elif val == 2:
+                                color.append('red')
+                            elif val == 3:
+                                color.append('blue')
+                            elif val == 4:
+                                color.append('green')
+                df = pd.DataFrame({'color': color})
+                plt.cla()
+
+                ax.voxels(piece_grid, facecolors=np.array(df.color).reshape(piece_grid.shape), edgecolor='k')
+                ax.set_box_aspect(grid.aspect_ratio)
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
+                ax.set_zticklabels([])
+                ax.figure.savefig(f'static//{piece_name}.png', format='png')
+            except ValueError:
+                source_path = 'static//invalid_move.png'
+                destination_path = f'static//{piece_name}.png'
+                shutil.copy(source_path, destination_path)
 
 
 class board:
@@ -324,10 +334,11 @@ def human_move(players, grid, piece_i):
 
     piece_i = player.piece_names_list.index(piece_i)
     piece = player.piece_list[piece_i]
-    x, y, z = player.piece_profile_positions
-    print(x, y, z)
+    x, y, z, rot_x, rot_y, rot_z = player.piece_profile_positions
+    print(x, y, z, rot_x, rot_y, rot_z)
 
     piece_name = player.piece_names_list[piece_i]
+    piece = orient2(piece, rot_x, rot_y, rot_z)
     layer = fill_out2(piece, grid.grid, x, y, z)
     grid.grid += layer
     title_string = f'Player {2} Turn {2}: {piece_name}'  # TODO: hardcoded
@@ -336,6 +347,10 @@ def human_move(players, grid, piece_i):
     ax_180 = grid.draw_board(title_string, rotation=1)
     ax_270 = grid.draw_board(title_string, rotation=0)
     return players, grid, ax, ax_90, ax_180, ax_270
+
+
+def orient2(piece, k1, k2, k3):
+    return np.rot90(np.rot90(np.rot90(piece, k=k1, axes=(0, 1)), k=k2, axes=(1, 2)), k=k3, axes=(0, 2))
 
 
 def fill_out2(piece, grid, row, col, stack):

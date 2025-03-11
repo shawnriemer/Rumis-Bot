@@ -1,10 +1,8 @@
 from flask import Flask, render_template, request, jsonify, session
 from modules.functions import *
-# from flask_cors import CORS
 import jsonpickle
 
 app = Flask(__name__)
-# CORS(app)
 app.secret_key = '234897f134951'  # Required to use session
 
 
@@ -38,17 +36,16 @@ def nextTurn():
 
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
-    players[str(2)].draw_pieces(grid, 0, 0, 0)  # TODO: hardcoded
+    players[str(2)].draw_pieces(grid, 0, 0, 0, 0, 0, 0)  # TODO: hardcoded
 
     if (session['turn'] % 4) + 1 != 2:  # TODO: hardcoded
         players, grid, ax, ax_90, ax_180, ax_270 = play_turn(session['turn'], players, grid)
     else:
-        # players, grid, ax, ax_90, ax_180, ax_270 = human_move(players, grid, int(data['piece']), int(data['x']), int(data['y']), int(data['z']))
         players, grid, ax, ax_90, ax_180, ax_270 = human_move(players, grid, data['piece'])
 
     # Reset profile places for each player
     for player in players.values():
-        player.piece_profile_positions = (0, 0, 0)
+        player.piece_profile_positions = (0, 0, 0, 0, 0, 0)
 
     session['players'] = jsonpickle.encode(players)
     session['grid'] = jsonpickle.encode(grid)
@@ -68,36 +65,36 @@ def move_piece():
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
     move = data['move']
+
+    player = players[str(2)]  # TODO: hardcoded
+    current_x, current_y, current_z, rot_x, rot_y, rot_z = player.piece_profile_positions
     if move == 'right':
-        for player in players.values():
-            current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x, current_y + 1, current_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y + 1, current_z)  # TODO: hardcoded
+        player.piece_profile_positions = (current_x + 1, current_y, current_z, rot_x, rot_y, rot_z)
+        players[str(2)].draw_pieces(grid, current_x + 1, current_y, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'left':
-        for player in players.values():
-            current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x, current_y - 1, current_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y - 1, current_z)  # TODO: hardcoded
+        player.piece_profile_positions = (current_x - 1, current_y, current_z, rot_x, rot_y, rot_z)
+        players[str(2)].draw_pieces(grid, current_x - 1, current_y, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'away':
-        for player in players.values():
-            current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x + 1, current_y, current_z)
-        players[str(2)].draw_pieces(grid, current_x + 1, current_y, current_z)  # TODO: hardcoded
+        player.piece_profile_positions = (current_x, current_y + 1, current_z, rot_x, rot_y, rot_z)
+        players[str(2)].draw_pieces(grid, current_x, current_y + 1, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'towards':
-        for player in players.values():
-            current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x - 1, current_y, current_z)
-        players[str(2)].draw_pieces(grid, current_x - 1, current_y, current_z)  # TODO: hardcoded
+        player.piece_profile_positions = (current_x, current_y - 1, current_z, rot_x, rot_y, rot_z)
+        players[str(2)].draw_pieces(grid, current_x, current_y - 1, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'up':
-        for player in players.values():
-            current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x, current_y, current_z + 1)
-        players[str(2)].draw_pieces(grid, current_x, current_y, current_z + 1)  # TODO: hardcoded
+        player.piece_profile_positions = (current_x, current_y, current_z + 1, rot_x, rot_y, rot_z)
+        players[str(2)].draw_pieces(grid, current_x, current_y, current_z + 1, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'down':
-        for player in players.values():
-            current_x, current_y, current_z = player.piece_profile_positions
-            player.piece_profile_positions = (current_x, current_y, current_z - 1)
-        players[str(2)].draw_pieces(grid, current_x, current_y, current_z - 1)  # TODO: hardcoded
+        player.piece_profile_positions = (current_x, current_y, current_z - 1, rot_x, rot_y, rot_z)
+        players[str(2)].draw_pieces(grid, current_x, current_y, current_z - 1, rot_x, rot_y, rot_z)  # TODO: hardcoded
+    elif move == 'x':
+        player.piece_profile_positions = (current_x, current_y, current_z, rot_x, rot_y, rot_z + 1)
+        players[str(2)].draw_pieces(grid, current_x, current_y, current_z, rot_x, rot_y, rot_z + 1)  # TODO: hardcoded
+    elif move == 'y':
+        player.piece_profile_positions = (current_x, current_y, current_z, rot_x + 1, rot_y, rot_z)
+        players[str(2)].draw_pieces(grid, current_x, current_y, current_z, rot_x + 1, rot_y, rot_z)  # TODO: hardcoded
+    elif move == 'z':
+        player.piece_profile_positions = (current_x, current_y, current_z, rot_x, rot_y + 1, rot_z)
+        players[str(2)].draw_pieces(grid, current_x, current_y, current_z, rot_x, rot_y + 1, rot_z)  # TODO: hardcoded
 
     session['players'] = jsonpickle.encode(players)
 
