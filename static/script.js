@@ -39,8 +39,7 @@
 //}
 
 
-
-// Iterate through Rumis turns
+// Iterate through computer turns
 document.getElementById("nextTurn").addEventListener("click", nextTurn);
 function nextTurn() {
 
@@ -71,6 +70,7 @@ function nextTurn() {
     });
 
 }
+
 
 // Play human's turn
 const pieces = ['4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR']
@@ -108,7 +108,7 @@ function nextTurn_human(evt) {
 }
 
 
-// Rotate board
+// Rotate current game board
 document.getElementById("rotate").addEventListener("click", rotate);
 
 function rotate(){

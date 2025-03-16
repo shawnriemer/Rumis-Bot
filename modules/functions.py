@@ -3,6 +3,8 @@ import numpy as np
 import random
 import shutil
 import plotly.express as px
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import base64
@@ -19,7 +21,6 @@ class Competitor:
             self.number * np.array([[[1, 1, 1, 1]]]),
             self.number * np.array([[[1, 1, 1]]]),
             self.number * np.array([[[1, 1]]]),
-            # TODO: fix rest of pieces
             self.number * np.array([[[1, 0, 0], [1, 1, 1]]]),
             self.number * np.array([[[1, 1], [1, 1]]]),
             self.number * np.array([[[1, 0], [1, 1]]]),
@@ -35,7 +36,6 @@ class Competitor:
         self.piece_profile_positions = (0, 0, 0, 0, 0, 0)
 
     def draw_pieces(self, grid, x=0, y=0, z=0, k1=0, k2=0, k3=0):
-        ax = plt.figure(figsize=(3.2, 2.4)).add_subplot(projection='3d')
         for piece, piece_name in zip(self.piece_list, self.piece_names_list):
             empty_grid = board('chullpa')  # TODO: hardcoded
             piece = np.rot90(np.rot90(np.rot90(piece, k=k1, axes=(0, 1)), k=k2, axes=(1, 2)), k=k3, axes=(0, 2))
@@ -62,14 +62,16 @@ class Competitor:
                             elif val == 4:
                                 color.append('green')
                 df = pd.DataFrame({'color': color})
-                plt.cla()
 
+                ax = plt.figure(figsize=(3.2, 2.4)).add_subplot(projection='3d')
                 ax.voxels(piece_grid, facecolors=np.array(df.color).reshape(piece_grid.shape), edgecolor='k')
                 ax.set_box_aspect(grid.aspect_ratio)
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
                 ax.set_zticklabels([])
                 ax.figure.savefig(f'static//{piece_name}.png', format='png')
+                plt.clf()
+                plt.close()
             except ValueError:
                 source_path = 'static//invalid_move.png'
                 destination_path = f'static//{piece_name}.png'
@@ -166,7 +168,11 @@ class board:
 
         ax.set_title(title_string)
 
+        # TODO: activate this
+        # ax.figure.savefig(f'static//test_{270 - (90 * rotation)}.png', format='png')
+
         return ax
+
 
     def get_results(self):
         grid = self.grid
@@ -346,7 +352,15 @@ def human_move(players, grid, piece_i):
     ax_90 = grid.draw_board(title_string, rotation=2)
     ax_180 = grid.draw_board(title_string, rotation=1)
     ax_270 = grid.draw_board(title_string, rotation=0)
-    return players, grid, ax, ax_90, ax_180, ax_270
+
+    ax.figure.savefig('static//test_0.png', format='png')
+    ax_90.figure.savefig('static//test_90.png', format='png')
+    ax_180.figure.savefig('static//test_180.png', format='png')
+    ax_270.figure.savefig('static//test_270.png', format='png')
+
+    plt.close('all')
+
+    return players, grid#, ax, ax_90, ax_180, ax_270
 
 
 def orient2(piece, k1, k2, k3):
@@ -372,46 +386,46 @@ def fill_out2(piece, grid, row, col, stack):
                   ((stack_top_pad, stack_bottom_pad), (row_top_pad, row_bottom_pad), (col_left_pad, col_right_pad)))
 
 
-def play_game(num_players, board_name):
-    p1 = Competitor('cp', 1, 'yellow')
-    p2 = Competitor('cp', 2, 'red')
-    p3 = Competitor('cp', 3, 'blue')
-    p4 = Competitor('human', 4, 'green')
-    players = {1: p1, 2: p2, 3: p3, 4: p4}
-
-    grid = board(board_name)
-
-    # Play
-    i = 0
-    while i <= 1:
-        # Figure out whose turn it is and get their available pieces
-        player_num = (i % num_players) + 1
-        player = players[player_num]
-
-        turn_2 = True if (i > 0) and (i < num_players) else False
-
-        # Indicate if it's the player's first turn
-        start = True if i <= 1 else False
-
-        # Play a piece
-        if (player.still_playing is True) and (len(player.piece_list) > 0):
-            grid, piece_name = play_move(player, grid, start, turn_2)
-            if piece_name is None:
-                title_string = f'Player {player_num} Maxed Out Attempts'
-                ax = grid.draw_board(title_string)
-            else:
-                title_string = f'Player {player_num} Turn {i + 1}: {piece_name}'
-                ax = grid.draw_board(title_string)
-        if (player.still_playing is True) and (len(player.piece_list)) == 0:
-            title_string = f'Player {player_num} Out of Pieces'
-            ax = grid.draw_board(title_string)
-            player.still_playing = False
-
-        i += 1
-
-    print(grid.get_results())
-
-    return ax, grid
+# def play_game(num_players, board_name):
+#     p1 = Competitor('cp', 1, 'yellow')
+#     p2 = Competitor('cp', 2, 'red')
+#     p3 = Competitor('cp', 3, 'blue')
+#     p4 = Competitor('human', 4, 'green')
+#     players = {1: p1, 2: p2, 3: p3, 4: p4}
+#
+#     grid = board(board_name)
+#
+#     # Play
+#     i = 0
+#     while i <= 1:
+#         # Figure out whose turn it is and get their available pieces
+#         player_num = (i % num_players) + 1
+#         player = players[player_num]
+#
+#         turn_2 = True if (i > 0) and (i < num_players) else False
+#
+#         # Indicate if it's the player's first turn
+#         start = True if i <= 1 else False
+#
+#         # Play a piece
+#         if (player.still_playing is True) and (len(player.piece_list) > 0):
+#             grid, piece_name = play_move(player, grid, start, turn_2)
+#             if piece_name is None:
+#                 title_string = f'Player {player_num} Maxed Out Attempts'
+#                 ax = grid.draw_board(title_string)
+#             else:
+#                 title_string = f'Player {player_num} Turn {i + 1}: {piece_name}'
+#                 ax = grid.draw_board(title_string)
+#         if (player.still_playing is True) and (len(player.piece_list)) == 0:
+#             title_string = f'Player {player_num} Out of Pieces'
+#             ax = grid.draw_board(title_string)
+#             player.still_playing = False
+#
+#         i += 1
+#
+#     print(grid.get_results())
+#
+#     return ax, grid
 
 
 def start_game(num_players, board_name):
@@ -461,5 +475,12 @@ def play_turn(turn, players, grid):
         ax_270 = grid.draw_board(title_string, rotation=0)
         player.still_playing = False
 
-    return players, grid, ax, ax_90, ax_180, ax_270
+    ax.figure.savefig('static//test_0.png', format='png')
+    ax_90.figure.savefig('static//test_90.png', format='png')
+    ax_180.figure.savefig('static//test_180.png', format='png')
+    ax_270.figure.savefig('static//test_270.png', format='png')
+
+    plt.close('all')
+
+    return players, grid#, ax, ax_90, ax_180, ax_270
 

@@ -10,6 +10,7 @@
 
 <h1>SHAWN</h1>
 
+<!--This button selects the game board and starts a new game-->
 <form action="/", method="POST">
 <div class="menu">
     <div>
@@ -28,22 +29,23 @@
     <br><button type="submit">Start new game</button>
 </form>
 
-
-
+<!--Current game board-->
 <img id='gameBoard' src={{ url_for('static', filename='test_0.png') }}>
 
+<br><br>
 
-<br>
-<br>
-
-<!--<input type="text" id="input2">-->
+<!--Button to cycle through computer's turns-->
 <button id="nextTurn">Next Turn</button>
+
+<!--This sections displays the turn number once a game is underway-->
 <div id="output"></div>
 
+<!--This button rotates the current game board by 90 degrees-->
 <button id="rotate">Rotate View</button>
 
 <br><br>
 
+<!--This section controls the location of the human's remaining pieces-->
 <button type="submit" id="move_left">Move Left</button>
 <button type="submit" id="move_towards">Move Towards</button>
 <button type="submit" id="move_down">Move Down</button>
@@ -56,41 +58,54 @@
 <button type="submit" id="move_y">Rotate Y</button>
 <button type="submit" id="move_z">Rotate Z</button>
 
+<br><br><br>
 
-<br><br>
-
-<button type="submit" id="next_turn_2x1">Play Piece</button>
-<img id='2x1' src={{ url_for('static', filename='2x1.png') }}>
-
-<button type="submit" id="next_turn_3x1">Play Piece</button>
-<img id='3x1' src={{ url_for('static', filename='3x1.png') }}>
-
-<button type="submit" id="next_turn_4x1">Play Piece</button>
-<img id='4x1' src={{ url_for('static', filename='4x1.png') }}>
-
-<button type="submit" id="next_turn_archer">Play Piece</button>
-<img id='archer' src={{ url_for('static', filename='archer.png') }}>
-
-<button type="submit" id="next_turn_bend">Play Piece</button>
-<img id='bend' src={{ url_for('static', filename='bend.png') }}>
-
-<button type="submit" id="next_turn_corner">Play Piece</button>
-<img id='corner' src={{ url_for('static', filename='corner.png') }}>
-
-<button type="submit" id="next_turn_L">Play Piece</button>
-<img id='L' src={{ url_for('static', filename='L.png') }}>
-
-<button type="submit" id="next_turn_pipe">Play Piece</button>
-<img id='pipe' src={{ url_for('static', filename='pipe.png') }}>
-
-<button type="submit" id="next_turn_square">Play Piece</button>
-<img id='square' src={{ url_for('static', filename='square.png') }}>
-
-<button type="submit" id="next_turn_twistL">Play Piece</button>
-<img id='twistL' src={{ url_for('static', filename='twistL.png') }}>
-
-<button type="submit" id="next_turn_twistR">Play Piece</button>
-<img id='twistR' src={{ url_for('static', filename='twistR.png') }}>
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; justify-content: center;">
+    <div style="text-align: center;">
+        <img id='2x1' src={{ url_for('static', filename='2x1.png') }}>
+        <button type="submit" id="next_turn_2x1">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='3x1' src={{ url_for('static', filename='3x1.png') }}>
+        <button type="submit" id="next_turn_3x1">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='4x1' src={{ url_for('static', filename='4x1.png') }}>
+        <button type="submit" id="next_turn_4x1">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='archer' src={{ url_for('static', filename='archer.png') }}>
+        <button type="submit" id="next_turn_archer">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='bend' src={{ url_for('static', filename='bend.png') }}>
+        <button type="submit" id="next_turn_bend">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='corner' src={{ url_for('static', filename='corner.png') }}>
+        <button type="submit" id="next_turn_corner">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='L' src={{ url_for('static', filename='L.png') }}>
+        <button type="submit" id="next_turn_L">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='pipe' src={{ url_for('static', filename='pipe.png') }}>
+        <button type="submit" id="next_turn_pipe">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='square' src={{ url_for('static', filename='square.png') }}>
+        <button type="submit" id="next_turn_square">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='twistL' src={{ url_for('static', filename='twistL.png') }}>
+        <button type="submit" id="next_turn_twistL">Play Piece</button>
+    </div>
+    <div style="text-align: center;">
+        <img id='twistR' src={{ url_for('static', filename='twistR.png') }}>
+        <button type="submit" id="next_turn_twistR">Play Piece</button>
+    </div>
+</div>
 
 
 </body>
