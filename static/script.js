@@ -68,7 +68,6 @@ function nextTurn() {
         var image = document.getElementById("gameBoard");
         image.src = `static/test_0.png?t=${timestamp}`
     });
-
 }
 
 
@@ -104,7 +103,6 @@ function nextTurn_human(evt) {
         var image = document.getElementById("gameBoard");
         image.src = `static/test_0.png?t=${timestamp}`
     });
-
 }
 
 
@@ -161,3 +159,31 @@ function movePieces(evt) {
     });
 }
 
+
+// bruh
+document.getElementById('reset').addEventListener("click", reset_pieces);
+function reset_pieces() {
+    fetch('/reset', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 'test': 'a' })
+        }
+    )
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then((data) => {
+        var timestamp = new Date().getTime();
+        // Loop through array of each piece
+        const pieces = ['4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR']
+        for (const piece of pieces) {
+            var image = document.getElementById(piece);
+            image.src = `static/${piece}.png?t=${timestamp}`
+        }
+    });
+}

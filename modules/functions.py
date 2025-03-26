@@ -34,6 +34,7 @@ class Competitor:
             '4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR'
         ]
         self.piece_profile_positions = (0, 0, 0, 0, 0, 0)
+        self.turn = 0
 
     def draw_pieces(self, grid, x=0, y=0, z=0, k1=0, k2=0, k3=0):
         for piece, piece_name in zip(self.piece_list, self.piece_names_list):
@@ -42,7 +43,16 @@ class Competitor:
             # If a voxel can't be made then give up on that piece
             try:
                 layer = fill_out2(piece, empty_grid.grid, x, y, z)
-                # piece_grid = empty_grid.grid + layer
+                # Perform legality checks
+                if ((grid.grid * layer).max() != 0) or ((grid.grid * layer).min() != 0):
+                    raise ValueError
+                if self.turn > 1:
+                    adjacent, adjacent_bool = check_adjacent(grid.grid, layer, 2)  # TODO: hardcoded
+                    if adjacent_bool is False:
+                        raise ValueError
+                nothanging_bool = check_nothanging(grid.grid, layer, 2)  # TODO: hardcoded
+                if nothanging_bool is False:
+                    raise ValueError
                 piece_grid = grid.grid + layer
                 # Match up to how it's graphed
                 piece_grid = np.rot90(np.rot90(piece_grid, k=1, axes=(0, 2)), k=3, axes=(0, 1))
@@ -54,7 +64,7 @@ class Competitor:
                             if val == 0:
                                 color.append('none')
                             elif val == 1:
-                                color.append('yellow')
+                                color.append([1, 1, 0, 0.25])
                             elif val == 2:
                                 color.append('red')
                             elif val == 3:
@@ -173,7 +183,6 @@ class board:
 
         return ax
 
-
     def get_results(self):
         grid = self.grid
         grid = np.where(grid == -1, 0, grid)
@@ -273,7 +282,7 @@ def check_nothanging(grid, layer, player):
         for j, row in enumerate(level):
             for k, val in enumerate(row):
                 if val == player:
-                    # Spots below cant be empty
+                    # Spots below can't be empty
                     if (i > 0) and (new_grid[i - 1, j, k] == 0):
                         return False
     return True

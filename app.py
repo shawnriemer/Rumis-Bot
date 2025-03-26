@@ -13,16 +13,10 @@ def hello():
     if request.method == "POST":
         board_name = request.form.get("none_n")
         players, grid = start_game(4, board_name)
-        # players, grid, ax, ax_90, ax_180, ax_270 = play_turn(session['turn'], players, grid)
         players, grid = play_turn(session['turn'], players, grid)
 
         session['players'] = jsonpickle.encode(players)
         session['grid'] = jsonpickle.encode(grid)
-
-        # ax.figure.savefig('static//test_0.png', format='png')
-        # ax_90.figure.savefig('static//test_90.png', format='png')
-        # ax_180.figure.savefig('static//test_180.png', format='png')
-        # ax_270.figure.savefig('static//test_270.png', format='png')
 
     return render_template('index.html')
 
@@ -38,13 +32,12 @@ def nextTurn():
 
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
+    players[str(2)].turn += 1  # TODO: hardcoded
     players[str(2)].draw_pieces(grid, 0, 0, 0, 0, 0, 0)  # TODO: hardcoded
 
     if (session['turn'] % 4) + 1 != 2:  # TODO: hardcoded
-        # players, grid, ax, ax_90, ax_180, ax_270 = play_turn(session['turn'], players, grid)
         players, grid = play_turn(session['turn'], players, grid)
     else:
-        # players, grid, ax, ax_90, ax_180, ax_270 = human_move(players, grid, data['piece'])
         players, grid = human_move(players, grid, data['piece'])
 
     # Reset profile places for each player
@@ -53,11 +46,6 @@ def nextTurn():
 
     session['players'] = jsonpickle.encode(players)
     session['grid'] = jsonpickle.encode(grid)
-
-    # ax.figure.savefig('static//test_0.png', format='png')
-    # ax_90.figure.savefig('static//test_90.png', format='png')
-    # ax_180.figure.savefig('static//test_180.png', format='png')
-    # ax_270.figure.savefig('static//test_270.png', format='png')
 
     return jsonify({'turn': session['turn']})  # return the result to JavaScript
 
@@ -103,6 +91,17 @@ def move_piece():
     session['players'] = jsonpickle.encode(players)
 
     return jsonify({'result': 'hi'})  # return the result to JavaScript
+
+
+@app.route('/reset', methods=['POST'])
+def reset():
+    data = request.get_json()  # TODO: unnecessary
+    players = jsonpickle.decode(session['players'])
+    grid = jsonpickle.decode(session['grid'])
+    players[str(2)].piece_profile_positions = (0, 0, 0, 0, 0, 0)  # TODO: hardcoded
+    players[str(2)].draw_pieces(grid, 0, 0, 0, 0, 0, 0)  # TODO: hardcoded
+    session['players'] = jsonpickle.encode(players)
+    return jsonify('abc')  # TODO: useless
 
 
 if __name__ == '__main__':
