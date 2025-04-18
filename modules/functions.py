@@ -45,34 +45,51 @@ class Competitor:
                 layer = fill_out2(piece, empty_grid.grid, x, y, z)
                 # Perform legality checks
                 if ((grid.grid * layer).max() != 0) or ((grid.grid * layer).min() != 0):
-                    raise ValueError
+                    print('piece in the way')
+                    # raise ValueError
                 if self.turn > 1:
                     adjacent, adjacent_bool = check_adjacent(grid.grid, layer, 2)  # TODO: hardcoded
                     if adjacent_bool is False:
-                        raise ValueError
+                        print('adjacent_bool = False')
+                        # raise ValueError
                 nothanging_bool = check_nothanging(grid.grid, layer, 2)  # TODO: hardcoded
                 if nothanging_bool is False:
-                    raise ValueError
-                piece_grid = grid.grid + layer
+                    print('nothanging_bool = False')
+                    # raise ValueError
+
+                # Replace overlapping pieces with 5
+                piece_grid_add = grid.grid + layer
+                piece_grid_mult = grid.grid * layer
+                piece_grid = np.where(piece_grid_mult != 0, 5, piece_grid_add)
+
                 # Match up to how it's graphed
+                layer = np.rot90(np.rot90(layer, k=1, axes=(0, 2)), k=3, axes=(0, 1))
                 piece_grid = np.rot90(np.rot90(piece_grid, k=1, axes=(0, 2)), k=3, axes=(0, 1))
 
+                # Create color DataFrame
                 color = []
-                for i, layer in enumerate(piece_grid):
-                    for j, row in enumerate(layer):
+                for i, level in enumerate(piece_grid):
+                    for j, row in enumerate(level):
                         for k, val in enumerate(row):
+                            if layer[i, j, k] > 0:
+                                opacity = 1
+                            else:
+                                opacity = 0.25
                             if val == 0:
                                 color.append('none')
                             elif val == 1:
                                 color.append([1, 1, 0, 0.25])
                             elif val == 2:
-                                color.append('red')
+                                color.append([1, 0, 0, opacity])  # TODO: hardcoded
                             elif val == 3:
-                                color.append('blue')
+                                color.append([0, 0, 1, 0.25])
                             elif val == 4:
-                                color.append('green')
+                                color.append([0, 1, 0, 0.25])
+                            elif val == 5:
+                                color.append([0, 0, 0])
                 df = pd.DataFrame({'color': color})
 
+                # Create graph and save image
                 ax = plt.figure(figsize=(3.2, 2.4)).add_subplot(projection='3d')
                 ax.voxels(piece_grid, facecolors=np.array(df.color).reshape(piece_grid.shape), edgecolor='k')
                 ax.set_box_aspect(grid.aspect_ratio)
@@ -252,7 +269,7 @@ def check_adjacent(grid, layer, player, turn_2=False):
         for j, row in enumerate(level):
             for k, val in enumerate(row):
 
-                player_check = (val > 0) if turn_2 is True else (val == player)
+                player_check = (val > 0) if turn_2 is True else (val == player) #or (val == player * 5))
                 if player_check:
 
                     # Spots above current spots

@@ -11,7 +11,7 @@ def hello():
     session.clear()
     session['turn'] = 0
     if request.method == "POST":
-        board_name = request.form.get("none_n")
+        board_name = request.form.get("game_board")
         players, grid = start_game(4, board_name)
         players, grid = play_turn(session['turn'], players, grid)
 

@@ -12,20 +12,78 @@
 
 <!--This button selects the game board and starts a new game-->
 <form action="/", method="POST">
-<div class="menu">
-    <div>
-        <label for="game-select">Choose a game board:</label>
-        <select name="none_n" id="game-select">
-            <option value="">--Please choose an option--</option>
-            <option value="chullpa">Chullpa (Tower)</option>
-            <option value="pirka">Pirka (Wall)</option>
-            <option value="coricancha">Coricancha (Pyramid)</option>
-            <option value="pisac">Pisac (Stairs)</option>
-            <option value="cucho">Cucho (Corner)</option>
-            <option value="tambo">Tambo (Lodge)</option>
-        </select>
-    </div>
-</div>
+
+    <input type="checkbox" id="scales" name="scales" checked />
+    <label for="cp_human">Player 1</label>
+    <select name="cp_human" id="cp_human">
+        <option value="CP">CP</option>
+        <option value="Human">Human</option>
+    </select>
+    <select name="color" id="color">
+        <option value="yellow">Yellow</option>
+        <option value="red">Red</option>
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+    </select>
+
+    <br>
+
+    <input type="checkbox" id="scales" name="scales" checked />
+    <label for="cp_human">Player 2</label>
+    <select name="cp_human" id="cp_human">
+        <option value="CP">CP</option>
+        <option value="Human">Human</option>
+    </select>
+    <select name="color" id="color">
+        <option value="yellow">Yellow</option>
+        <option value="red">Red</option>
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+    </select>
+
+    <br>
+
+    <input type="checkbox" id="scales" name="scales" checked />
+    <label for="cp_human">Player 3</label>
+    <select name="cp_human" id="cp_human">
+        <option value="CP">CP</option>
+        <option value="Human">Human</option>
+    </select>
+    <select name="color" id="color">
+        <option value="yellow">Yellow</option>
+        <option value="red">Red</option>
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+    </select>
+
+    <br>
+
+    <input type="checkbox" id="scales" name="scales" checked />
+    <label for="cp_human">Player 4</label>
+    <select name="cp_human" id="cp_human">
+        <option value="CP">CP</option>
+        <option value="Human">Human</option>
+    </select>
+    <select name="color" id="color">
+        <option value="yellow">Yellow</option>
+        <option value="red">Red</option>
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+    </select>
+
+    <br>
+
+    <label for="game-select">Game board:</label>
+    <select name="game_board" id="game-select">
+        <option value="chullpa">--Choose an option--</option>
+        <option value="chullpa">Chullpa (Tower)</option>
+        <option value="pirka">Pirka (Wall)</option>
+        <option value="coricancha">Coricancha (Pyramid)</option>
+        <option value="pisac">Pisac (Stairs)</option>
+        <option value="cucho">Cucho (Corner)</option>
+        <option value="tambo">Tambo (Lodge)</option>
+    </select>
+
     <br><button type="submit">Start new game</button>
 </form>
 
