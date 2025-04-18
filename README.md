@@ -1,13 +1,14 @@
 # Rumis Bot
 
 # To-do:
-- Allow rotation of pieces
-- Refresh human piece previews every turn
-- Make human pieces follow rules
-  - X-out pieces that can't be played in that orientation
-  - Only allow each pece to be played once
-  - Check if other pieces are already played there, if there's overlap
+- Show preview but don't allow placement of an illegal piece
+  - Take away Play Piece button when necessary
+    - Illegal or not a human's move
+- Only allow each piece to be played once
+  - Take away preview and Play Piece button when necessary
+- Refresh human piece while showing existing pieces
+- Add full game start menu
+  - Number of players, CP/human, colors, board
 - Remove hardcoded sections
-  - Number of players, colors, etc
 - Clean up code
 - Teach AI
