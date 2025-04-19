@@ -11,8 +11,25 @@ def hello():
     session.clear()
     session['turn'] = 0
     if request.method == "POST":
+        check1 = True if request.form.get("check1") == 'on' else False
+        check2 = True if request.form.get("check2") == 'on' else False
+        check3 = True if request.form.get("check3") == 'on' else False
+        check4 = True if request.form.get("check4") == 'on' else False
+        cphuman1 = request.form.get("cphuman1")
+        cphuman2 = request.form.get("cphuman2")
+        cphuman3 = request.form.get("cphuman3")
+        cphuman4 = request.form.get("cphuman4")
+        color1 = request.form.get("color1")
+        color2 = request.form.get("color2")
+        color3 = request.form.get("color3")
+        color4 = request.form.get("color4")
         board_name = request.form.get("game_board")
-        players, grid = start_game(4, board_name)
+        players, grid = start_game(
+            board_name,
+            check1, check2, check3, check4,
+            cphuman1, cphuman2, cphuman3, cphuman4,
+            color1, color2, color3, color4
+        )
         players, grid = play_turn(session['turn'], players, grid)
 
         session['players'] = jsonpickle.encode(players)

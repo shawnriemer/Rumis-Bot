@@ -2,11 +2,9 @@ import pandas as pd
 import numpy as np
 import random
 import shutil
-import plotly.express as px
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
 import base64
 from io import BytesIO
 
@@ -454,12 +452,21 @@ def fill_out2(piece, grid, row, col, stack):
 #     return ax, grid
 
 
-def start_game(num_players, board_name):
-    p1 = Competitor('cp', 1, 'yellow')
-    p2 = Competitor('human', 2, 'red')
-    p3 = Competitor('cp', 3, 'blue')
-    p4 = Competitor('cp', 4, 'green')
-    players = {'1': p1, '2': p2, '3': p3, '4': p4}
+def start_game(
+    board_name,
+    check1, check2, check3, check4,
+    cphuman1, cphuman2, cphuman3, cphuman4,
+    color1, color2, color3, color4
+):
+    p1 = Competitor(cphuman1, 1, color1)
+    p2 = Competitor(cphuman2, 2, color2)
+    players = {'1': p1, '2': p2}
+    if check3:
+        p3 = Competitor(cphuman3, 3, color3)
+        players['3'] = p3
+    if check4:
+        p4 = Competitor(cphuman4, 4, color4)
+        players['4'] = p4
     grid = board(board_name)
     p2.draw_pieces(grid)  # TODO: hardcoded
     return players, grid
@@ -468,7 +475,7 @@ def start_game(num_players, board_name):
 def play_turn(turn, players, grid):
 
     # Figure out whose turn it is and get their available pieces
-    num_players = 4  # TODO: hard coded
+    num_players = len(players)
     player_num = (turn % num_players) + 1
     print(f"player_num: {player_num}")
     player = players[str(player_num)]
