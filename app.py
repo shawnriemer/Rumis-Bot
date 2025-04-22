@@ -11,6 +11,7 @@ def hello():
     session.clear()
     session['turn'] = 0
     if request.method == "POST":
+        # Retrieve attributes for each player and the board
         check1 = True if request.form.get("check1") == 'on' else False
         check2 = True if request.form.get("check2") == 'on' else False
         check3 = True if request.form.get("check3") == 'on' else False
@@ -24,14 +25,19 @@ def hello():
         color3 = request.form.get("color3")
         color4 = request.form.get("color4")
         board_name = request.form.get("game_board")
+
+        # Create player and grid objects
         players, grid = start_game(
             board_name,
             check1, check2, check3, check4,
             cphuman1, cphuman2, cphuman3, cphuman4,
             color1, color2, color3, color4
         )
+
+        # Play first turn
         players, grid = play_turn(session['turn'], players, grid)
 
+        # Save game's data
         session['players'] = jsonpickle.encode(players)
         session['grid'] = jsonpickle.encode(grid)
 
@@ -41,10 +47,7 @@ def hello():
 @app.route('/nextturn', methods=['POST'])
 def nextTurn():
     data = request.get_json()  # retrieve the data sent from JavaScript
-    print(data)
-
     session['turn'] += 1
-
     print(f"Turn: {session['turn']}")
 
     players = jsonpickle.decode(session['players'])
@@ -61,6 +64,7 @@ def nextTurn():
     for player in players.values():
         player.piece_profile_positions = (0, 0, 0, 0, 0, 0)
 
+    # Save game's data
     session['players'] = jsonpickle.encode(players)
     session['grid'] = jsonpickle.encode(grid)
 
