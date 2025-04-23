@@ -34,25 +34,28 @@ class Competitor:
         self.piece_profile_positions = (0, 0, 0, 0, 0, 0)
         self.turn = 0
 
-    def draw_pieces(self, grid, x=0, y=0, z=0, k1=0, k2=0, k3=0):
+    def draw_pieces(self, grid, players, x=0, y=0, z=0, k1=0, k2=0, k3=0):
         for piece, piece_name in zip(self.piece_list, self.piece_names_list):
-            empty_grid = board('chullpa')  # TODO: hardcoded
+            empty_grid = board(grid.board_name)
             piece = np.rot90(np.rot90(np.rot90(piece, k=k1, axes=(0, 1)), k=k2, axes=(1, 2)), k=k3, axes=(0, 2))
             # If a voxel can't be made then give up on that piece
             try:
                 layer = fill_out2(piece, empty_grid.grid, x, y, z)
                 # Perform legality checks
                 if ((grid.grid * layer).max() != 0) or ((grid.grid * layer).min() != 0):
-                    print('piece in the way')
+                    pass
+                    # print('piece in the way')
                     # raise ValueError
                 if self.turn > 1:
                     adjacent, adjacent_bool = check_adjacent(grid.grid, layer, 2)  # TODO: hardcoded
                     if adjacent_bool is False:
-                        print('adjacent_bool = False')
+                        pass
+                        # print('adjacent_bool = False')
                         # raise ValueError
                 nothanging_bool = check_nothanging(grid.grid, layer, 2)  # TODO: hardcoded
                 if nothanging_bool is False:
-                    print('nothanging_bool = False')
+                    pass
+                    # print('nothanging_bool = False')
                     # raise ValueError
 
                 # Replace overlapping pieces with 5
@@ -65,6 +68,15 @@ class Competitor:
                 piece_grid = np.rot90(np.rot90(piece_grid, k=1, axes=(0, 2)), k=3, axes=(0, 1))
 
                 # Create color DataFrame
+                color_rgb_map = {
+                    'red': [1, 0, 0],
+                    'yellow': [1, 1, 0],
+                    'green': [0, 1, 0],
+                    'blue': [0, 0, 1]
+                }
+
+                piece_grid = np.where(piece_grid == -1, 0, piece_grid)
+
                 color = []
                 for i, level in enumerate(piece_grid):
                     for j, row in enumerate(level):
@@ -76,13 +88,13 @@ class Competitor:
                             if val == 0:
                                 color.append('none')
                             elif val == 1:
-                                color.append([1, 1, 0, 0.25])
+                                color.append(color_rgb_map[players['1'].color] + [opacity])
                             elif val == 2:
-                                color.append([1, 0, 0, opacity])  # TODO: hardcoded
+                                color.append(color_rgb_map[players['2'].color] + [opacity])
                             elif val == 3:
-                                color.append([0, 0, 1, 0.25])
+                                color.append(color_rgb_map[players['3'].color] + [opacity])
                             elif val == 4:
-                                color.append([0, 1, 0, 0.25])
+                                color.append(color_rgb_map[players['4'].color] + [opacity])
                             elif val == 5:
                                 color.append([0, 0, 0])
                 df = pd.DataFrame({'color': color})
@@ -97,6 +109,7 @@ class Competitor:
                 ax.figure.savefig(f'static//{piece_name}.png', format='png')
                 plt.clf()
                 plt.close()
+            # Catch when a piece has moved off the board
             except ValueError:
                 source_path = 'static//invalid_move.png'
                 destination_path = f'static//{piece_name}.png'
@@ -106,13 +119,16 @@ class Competitor:
 class board:
     def __init__(self, board):
         if board.lower() == 'chullpa':
+            self.board_name = 'chullpa'
             self.grid = np.zeros((8, 4, 5))
             self.aspect_ratio = [1, 1, 1.55]
         elif board.lower() == 'pirka':
+            self.board_name = 'pirka'
             self.grid = np.zeros((4, 8, 6))
             self.grid[:, 3:, :3] = -1
             self.aspect_ratio = [1, 1.7, 0.7]
         elif board.lower() == 'coricancha':
+            self.board_name = 'coricancha'
             self.grid = np.zeros((4, 8, 8))
             self.grid[1:, 0, :] = -1
             self.grid[1:, 7, :] = -1
@@ -128,6 +144,7 @@ class board:
             self.grid[3:, 2:6, 5] = -1
             self.aspect_ratio = [1, 1.3, 0.5]
         elif board.lower() == 'pisac':
+            self.board_name = 'pisac'
             self.grid = np.zeros((8, 8, 8))
             self.grid[:, 0:6, 0] = -1
             self.grid[:, 0:6, 7] = -1
@@ -144,6 +161,7 @@ class board:
             self.grid[7:, 1, :] = -1
             self.aspect_ratio = [1, 1.3, 1]
         elif board.lower() == 'cucho':
+            self.board_name = 'cucho'
             self.grid = np.zeros((5, 8, 8))
             self.grid[:, 0:4, 0:4] = -1
             self.grid[1:, 0, 4:] = -1
@@ -156,6 +174,7 @@ class board:
             self.grid[4:, 4:, 3] = -1
             self.aspect_ratio = [1, 1.35, 0.7]
         elif board.lower() == 'tambo':
+            self.board_name = 'tambo'
             self.grid = np.zeros((4, 7, 7))
             self.grid[:, :2, 5:] = -1
             self.grid[:, 5:, :2] = -1
@@ -163,9 +182,11 @@ class board:
             self.aspect_ratio = [1, 1.35, 0.55]
 
     def draw_board(self, title_string, players, rotation=3):
+        # Rotate grid for graphing software, replace illegal positions with 0 to avoid errors
         grid_t = np.rot90(np.rot90(self.grid, k=1, axes=(0, 2)), k=rotation, axes=(0, 1))
         grid_t = np.where(grid_t == -1, 0, grid_t)
 
+        # Loop through each square to record it's color for the graph
         color = []
         for i, layer in enumerate(grid_t):
             for j, row in enumerate(layer):
@@ -173,13 +194,13 @@ class board:
                     if val == 0:
                         color.append('none')
                     elif val == 1:
-                        color.append('yellow')
+                        color.append(players['1'].color)
                     elif val == 2:
-                        color.append('red')
+                        color.append(players['2'].color)
                     elif val == 3:
-                        color.append('blue')
+                        color.append(players['3'].color)
                     elif val == 4:
-                        color.append('green')
+                        color.append(players['4'].color)
         df = pd.DataFrame({'color': color})
 
         ax = plt.figure().add_subplot(projection='3d')
@@ -431,7 +452,7 @@ def start_game(
     grid = board(board_name)
 
     # Draw first humans pieces
-    p2.draw_pieces(grid)  # TODO: hardcoded
+    p2.draw_pieces(grid, players)  # TODO: hardcoded
 
     return players, grid
 

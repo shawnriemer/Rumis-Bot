@@ -16,10 +16,10 @@ def hello():
         check2 = True if request.form.get("check2") == 'on' else False
         check3 = True if request.form.get("check3") == 'on' else False
         check4 = True if request.form.get("check4") == 'on' else False
-        cphuman1 = request.form.get("cphuman1")
-        cphuman2 = request.form.get("cphuman2")
-        cphuman3 = request.form.get("cphuman3")
-        cphuman4 = request.form.get("cphuman4")
+        cphuman1 = 'cp' if request.form.get("cphuman1") == 'CP' else 'human'
+        cphuman2 = 'cp' if request.form.get("cphuman2") == 'CP' else 'human'
+        cphuman3 = 'cp' if request.form.get("cphuman3") == 'CP' else 'human'
+        cphuman4 = 'cp' if request.form.get("cphuman4") == 'CP' else 'human'
         color1 = request.form.get("color1")
         color2 = request.form.get("color2")
         color3 = request.form.get("color3")
@@ -34,8 +34,7 @@ def hello():
             color1, color2, color3, color4
         )
 
-        # Play first turn
-        players, grid = play_turn(session['turn'], players, grid)
+        # TODO: Draw blank board
 
         # Save game's data
         session['players'] = jsonpickle.encode(players)
@@ -47,17 +46,27 @@ def hello():
 @app.route('/nextturn', methods=['POST'])
 def nextTurn():
     data = request.get_json()  # retrieve the data sent from JavaScript
-    session['turn'] += 1
+    # session['turn'] += 1
     print(f"Turn: {session['turn']}")
 
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
-    players[str(2)].turn += 1  # TODO: hardcoded
-    players[str(2)].draw_pieces(grid, 0, 0, 0, 0, 0, 0)  # TODO: hardcoded
 
-    if (session['turn'] % 4) + 1 != 2:  # TODO: hardcoded
+    player_turn = (session['turn'] % len(players)) + 1
+    next_player_turn = ((session['turn'] + 1) % len(players)) + 1
+    print(f"Player {player_turn}'s turn, next turn: {next_player_turn} (# players: {len(players)})")
+
+    players[str(player_turn)].turn += 1  # TODO: hardcoded
+    players[str(next_player_turn)].draw_pieces(grid, players, 0, 0, 0, 0, 0, 0)  # TODO: hardcoded
+
+    # if (session['turn'] % len(players)) + 1 != 2:  # TODO: hardcoded
+    #     players, grid = play_turn(session['turn'], players, grid)
+    # else:
+    #     players, grid = human_move(players, grid, data['piece'])
+
+    if players[str(player_turn)].owner == 'cp':  # TODO: hardcoded
         players, grid = play_turn(session['turn'], players, grid)
-    else:
+    elif players[str(player_turn)].owner == 'human':
         players, grid = human_move(players, grid, data['piece'])
 
     # Reset profile places for each player
@@ -67,6 +76,7 @@ def nextTurn():
     # Save game's data
     session['players'] = jsonpickle.encode(players)
     session['grid'] = jsonpickle.encode(grid)
+    session['turn'] += 1
 
     return jsonify({'turn': session['turn']})  # return the result to JavaScript
 
@@ -77,37 +87,38 @@ def move_piece():
     data = request.get_json()
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
+    player_turn = str((session['turn'] % len(players)) + 1)
     move = data['move']
 
     player = players[str(2)]  # TODO: hardcoded
     current_x, current_y, current_z, rot_x, rot_y, rot_z = player.piece_profile_positions
     if move == 'right':
         player.piece_profile_positions = (current_x + 1, current_y, current_z, rot_x, rot_y, rot_z)
-        players[str(2)].draw_pieces(grid, current_x + 1, current_y, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
+        players[player_turn].draw_pieces(grid, players, current_x + 1, current_y, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'left':
         player.piece_profile_positions = (current_x - 1, current_y, current_z, rot_x, rot_y, rot_z)
-        players[str(2)].draw_pieces(grid, current_x - 1, current_y, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
+        players[player_turn].draw_pieces(grid, players, current_x - 1, current_y, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'away':
         player.piece_profile_positions = (current_x, current_y + 1, current_z, rot_x, rot_y, rot_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y + 1, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
+        players[player_turn].draw_pieces(grid, players, current_x, current_y + 1, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'towards':
         player.piece_profile_positions = (current_x, current_y - 1, current_z, rot_x, rot_y, rot_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y - 1, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
+        players[player_turn].draw_pieces(grid, players, current_x, current_y - 1, current_z, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'up':
         player.piece_profile_positions = (current_x, current_y, current_z + 1, rot_x, rot_y, rot_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y, current_z + 1, rot_x, rot_y, rot_z)  # TODO: hardcoded
+        players[player_turn].draw_pieces(grid, players, current_x, current_y, current_z + 1, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'down':
         player.piece_profile_positions = (current_x, current_y, current_z - 1, rot_x, rot_y, rot_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y, current_z - 1, rot_x, rot_y, rot_z)  # TODO: hardcoded
+        players[player_turn].draw_pieces(grid, players, current_x, current_y, current_z - 1, rot_x, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'x':
         player.piece_profile_positions = (current_x, current_y, current_z, rot_x, rot_y, rot_z + 1)
-        players[str(2)].draw_pieces(grid, current_x, current_y, current_z, rot_x, rot_y, rot_z + 1)  # TODO: hardcoded
+        players[player_turn].draw_pieces(grid, players, current_x, current_y, current_z, rot_x, rot_y, rot_z + 1)  # TODO: hardcoded
     elif move == 'y':
         player.piece_profile_positions = (current_x, current_y, current_z, rot_x + 1, rot_y, rot_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y, current_z, rot_x + 1, rot_y, rot_z)  # TODO: hardcoded
+        players[player_turn].draw_pieces(grid, players, current_x, current_y, current_z, rot_x + 1, rot_y, rot_z)  # TODO: hardcoded
     elif move == 'z':
         player.piece_profile_positions = (current_x, current_y, current_z, rot_x, rot_y + 1, rot_z)
-        players[str(2)].draw_pieces(grid, current_x, current_y, current_z, rot_x, rot_y + 1, rot_z)  # TODO: hardcoded
+        players[player_turn].draw_pieces(grid, players, current_x, current_y, current_z, rot_x, rot_y + 1, rot_z)  # TODO: hardcoded
 
     session['players'] = jsonpickle.encode(players)
 
@@ -116,11 +127,10 @@ def move_piece():
 
 @app.route('/reset', methods=['POST'])
 def reset():
-    data = request.get_json()  # TODO: unnecessary
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
     players[str(2)].piece_profile_positions = (0, 0, 0, 0, 0, 0)  # TODO: hardcoded
-    players[str(2)].draw_pieces(grid, 0, 0, 0, 0, 0, 0)  # TODO: hardcoded
+    players[str(2)].draw_pieces(grid, players, 0, 0, 0, 0, 0, 0)  # TODO: hardcoded
     session['players'] = jsonpickle.encode(players)
     return jsonify('abc')  # TODO: useless
 
