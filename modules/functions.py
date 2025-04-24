@@ -47,12 +47,12 @@ class Competitor:
                     # print('piece in the way')
                     # raise ValueError
                 if self.turn > 1:
-                    adjacent, adjacent_bool = check_adjacent(grid.grid, layer, 2)  # TODO: hardcoded
+                    adjacent, adjacent_bool = check_adjacent(grid.grid, layer, self.number)
                     if adjacent_bool is False:
                         pass
                         # print('adjacent_bool = False')
                         # raise ValueError
-                nothanging_bool = check_nothanging(grid.grid, layer, 2)  # TODO: hardcoded
+                nothanging_bool = check_nothanging(grid.grid, layer, self.number)
                 if nothanging_bool is False:
                     pass
                     # print('nothanging_bool = False')
@@ -296,6 +296,7 @@ def check_nothanging(grid, layer, player):
 
 
 def play_move(player, grid, start, turn_2):
+    # TODO: this function sucks
     attempt_counter = 0
 
     while True:
@@ -348,19 +349,19 @@ def play_move(player, grid, start, turn_2):
             return grid, None
 
 
-def human_move(players, grid, piece_i):
-    player = players[str(2)]  # TODO: hardcoded
+def human_move(player_turn, players, grid, piece_i):
+    print(f'Human move for player {player_turn}')
+    player = players[player_turn]
 
     piece_i = player.piece_names_list.index(piece_i)
     piece = player.piece_list[piece_i]
     x, y, z, rot_x, rot_y, rot_z = player.piece_profile_positions
-    print(x, y, z, rot_x, rot_y, rot_z)
 
     piece_name = player.piece_names_list[piece_i]
     piece = orient2(piece, rot_x, rot_y, rot_z)
     layer = fill_out2(piece, grid.grid, x, y, z)
     grid.grid += layer
-    title_string = f'Player {2} Turn {2}: {piece_name}'  # TODO: hardcoded
+    title_string = f'Player {player_turn} Turn {player.turn}: {piece_name}'
     ax = grid.draw_board(title_string, players=players)
     ax_90 = grid.draw_board(title_string, rotation=2, players=players)
     ax_180 = grid.draw_board(title_string, rotation=1, players=players)
@@ -462,7 +463,6 @@ def play_turn(turn, players, grid):
     # Figure out whose turn it is and get their available pieces
     num_players = len(players)
     player_num = (turn % num_players) + 1
-    print(f"player_num: {player_num}")
     player = players[str(player_num)]
 
     # Indicate if it's the player's first turn
