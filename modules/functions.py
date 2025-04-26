@@ -72,7 +72,9 @@ class Competitor:
                     'red': [1, 0, 0],
                     'yellow': [1, 1, 0],
                     'green': [0, 1, 0],
-                    'blue': [0, 0, 1]
+                    'blue': [0, 0, 1],
+                    'cyan': [0, 1, 1],
+                    'magenta': [1, 0, 1]
                 }
 
                 piece_grid = np.where(piece_grid == -1, 0, piece_grid)
@@ -114,6 +116,14 @@ class Competitor:
                 source_path = 'static//invalid_move.png'
                 destination_path = f'static//{piece_name}.png'
                 shutil.copy(source_path, destination_path)
+
+        full_piece_names_list = [
+            '4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR'
+        ]
+        for piece_name in list(set(full_piece_names_list) - set(self.piece_names_list)):
+            source_path = 'static//invalid_move.png'
+            destination_path = f'static//{piece_name}.png'
+            shutil.copy(source_path, destination_path)
 
 
 class board:
@@ -354,10 +364,10 @@ def human_move(player_turn, players, grid, piece_i):
     player = players[player_turn]
 
     piece_i = player.piece_names_list.index(piece_i)
-    piece = player.piece_list[piece_i]
-    x, y, z, rot_x, rot_y, rot_z = player.piece_profile_positions
+    piece = player.piece_list.pop(piece_i)
+    piece_name = player.piece_names_list.pop(piece_i)
 
-    piece_name = player.piece_names_list[piece_i]
+    x, y, z, rot_x, rot_y, rot_z = player.piece_profile_positions
     piece = orient2(piece, rot_x, rot_y, rot_z)
     layer = fill_out2(piece, grid.grid, x, y, z)
     grid.grid += layer
@@ -453,7 +463,17 @@ def start_game(
     grid = board(board_name)
 
     # Draw first humans pieces
-    p2.draw_pieces(grid, players)  # TODO: hardcoded
+    try:
+        if p1.owner == 'human':
+            p1.draw_pieces(grid, players)
+        elif p2.owner == 'human':
+            p2.draw_pieces(grid, players)
+        elif p3.owner == 'human':
+            p3.draw_pieces(grid, players)
+        elif p4.owner == 'human':
+            p4.draw_pieces(grid, players)
+    except UnboundLocalError:
+        p1.draw_pieces(grid, players)
 
     return players, grid
 

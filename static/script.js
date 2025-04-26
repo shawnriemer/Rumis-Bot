@@ -67,6 +67,14 @@ function nextTurn() {
         var timestamp = new Date().getTime();
         var image = document.getElementById("gameBoard");
         image.src = `static/test_0.png?t=${timestamp}`
+
+        // loop through pieces returned and display each one
+        const pieces = ['4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR']
+        // const pieces = data['piece_list']
+        for (const piece of pieces) {
+            var image = document.getElementById(piece);
+            image.src = `static/${piece}.png?t=${timestamp}`
+        }
     });
 }
 
@@ -102,6 +110,14 @@ function nextTurn_human(evt) {
         var timestamp = new Date().getTime();
         var image = document.getElementById("gameBoard");
         image.src = `static/test_0.png?t=${timestamp}`
+
+        // loop through pieces returned and display each one
+        const pieces = ['4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR']
+        // const pieces = data['piece_list']
+        for (const piece of pieces) {
+            var image = document.getElementById(piece);
+            image.src = `static/${piece}.png?t=${timestamp}`
+        }
     });
 }
 
@@ -152,6 +168,7 @@ function movePieces(evt) {
         var timestamp = new Date().getTime();
         // Loop through array of each piece
         const pieces = ['4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR']
+        // const pieces = data['piece_list']
         for (const piece of pieces) {
             var image = document.getElementById(piece);
             image.src = `static/${piece}.png?t=${timestamp}`

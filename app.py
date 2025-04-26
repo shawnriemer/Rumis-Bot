@@ -55,9 +55,6 @@ def nextTurn():
     next_player_turn = str(((session['turn'] + 1) % len(players)) + 1)
     print(f"Player {player_turn}'s turn, next turn: {next_player_turn} (# players: {len(players)})")
 
-    players[player_turn].turn += 1
-    players[next_player_turn].draw_pieces(grid, players, 0, 0, 0, 0, 0, 0)
-
     if players[player_turn].owner == 'cp':
         players, grid = play_turn(session['turn'], players, grid)
     elif players[player_turn].owner == 'human':
@@ -67,12 +64,15 @@ def nextTurn():
     for player in players.values():
         player.piece_profile_positions = (0, 0, 0, 0, 0, 0)
 
+    players[player_turn].turn += 1
+    players[next_player_turn].draw_pieces(grid, players)
+
     # Save game's data
     session['players'] = jsonpickle.encode(players)
     session['grid'] = jsonpickle.encode(grid)
     session['turn'] += 1
 
-    return jsonify({'turn': session['turn']})  # return the result to JavaScript
+    return jsonify({'turn': session['turn'], 'piece_list': players[next_player_turn].piece_names_list})  # return the result to JavaScript
 
 
 @app.route('/movePiece', methods=['POST'])
@@ -82,6 +82,7 @@ def move_piece():
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
     player_turn = str((session['turn'] % len(players)) + 1)
+    next_player_turn = str(((session['turn'] + 1) % len(players)) + 1)
     move = data['move']
 
     player = players[player_turn]
@@ -116,7 +117,7 @@ def move_piece():
 
     session['players'] = jsonpickle.encode(players)
 
-    return jsonify({'result': 'hi'})  # return the result to JavaScript
+    return jsonify({'piece_list': players[next_player_turn].piece_names_list})  # return the result to JavaScript
 
 
 @app.route('/reset', methods=['POST'])
