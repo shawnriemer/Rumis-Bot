@@ -36,11 +36,11 @@ class Competitor:
 
     def draw_pieces(self, grid, players, x=0, y=0, z=0, k1=0, k2=0, k3=0):
         for piece, piece_name in zip(self.piece_list, self.piece_names_list):
-            empty_grid = board(grid.board_name)
+            empty_grid = Board(grid.board_name)
             piece = np.rot90(np.rot90(np.rot90(piece, k=k1, axes=(0, 1)), k=k2, axes=(1, 2)), k=k3, axes=(0, 2))
             # If a voxel can't be made then give up on that piece
             try:
-                layer = fill_out2(piece, empty_grid.grid, x, y, z)
+                layer = fill_out(piece, empty_grid.grid, x, y, z)
                 # Perform legality checks
                 if ((grid.grid * layer).max() != 0) or ((grid.grid * layer).min() != 0):
                     pass
@@ -52,10 +52,10 @@ class Competitor:
                         pass
                         # print('adjacent_bool = False')
                         # raise ValueError
-                nothanging_bool = check_nothanging(grid.grid, layer, self.number)
-                if nothanging_bool is False:
+                supported_bool = check_supported(grid.grid, layer, self.number)
+                if supported_bool is False:
                     pass
-                    # print('nothanging_bool = False')
+                    # print('supported_bool = False')
                     # raise ValueError
 
                 # Replace overlapping pieces with 5
@@ -126,7 +126,7 @@ class Competitor:
             shutil.copy(source_path, destination_path)
 
 
-class board:
+class Board:
     def __init__(self, board):
         if board.lower() == 'chullpa':
             self.board_name = 'chullpa'
@@ -225,7 +225,7 @@ class board:
         ax.set_title(title_string)
 
         # TODO: activate this
-        # ax.figure.savefig(f'static//test_{270 - (90 * rotation)}.png', format='png')
+        # ax.figure.savefig(f'static//board_{270 - (90 * rotation)}.png', format='png')
 
         return ax
 
@@ -260,6 +260,8 @@ class board:
 
 
 def check_adjacent(grid, layer, player, turn_2=False):
+    """Return a boolean indicating if the selected move meets the adjacent rule."""
+    # Grab the board's dimensions and create a blank board
     n_layers, n_rows, n_columns = grid.shape
     adjacent = np.zeros((n_layers, n_rows, n_columns))
 
@@ -268,9 +270,11 @@ def check_adjacent(grid, layer, player, turn_2=False):
         for j, row in enumerate(level):
             for k, val in enumerate(row):
 
+                # True if the spot belongs to the current player, unless it's round 1
                 player_check = (val > 0) if turn_2 is True else (val == player)
-                if player_check:
 
+                # Create a DataFrame of every open spot adjacent to any of the current player's pieces
+                if player_check:
                     # Spots above current spots
                     if (i < (n_layers - 1)) and (grid[i + 1, j, k] == 0):
                         adjacent[i + 1, j, k] = player
@@ -287,11 +291,15 @@ def check_adjacent(grid, layer, player, turn_2=False):
                     if (k < (n_columns - 1)) and (grid[i, j, k + 1] == 0):
                         adjacent[i, j, k + 1] = player
 
+    # Make sure the selected piece includes at least one spot adjacent to the player's existing pieces
     adjacent_bool = False if (adjacent * layer).max() == 0 else True
+
     return adjacent, adjacent_bool
 
 
-def check_nothanging(grid, layer, player):
+def check_supported(grid, layer, player):
+    """Return a boolean indicating if the selected move meets the overhanging rule."""
+    # Create the board if the selected move is played
     new_grid = grid + layer
 
     # Loop through each square on board
@@ -306,11 +314,30 @@ def check_nothanging(grid, layer, player):
 
 
 def play_move(player, grid, start, turn_2):
+    """Randomly make a move for the computer.
+
+    Parameters
+    ----------
+    player : Competitor
+        The current player's Competitor object.
+    grid : Board
+        The current game's board.
+    start : bool
+        Indicates if this is the first turn.
+    turn_2 : bool
+        Indicates if this is the first round  # TODO: is this round or turn 2?
+
+    Returns
+    -------
+    Board
+        Updated Board object
+    string
+        The name of the piece being played, if a valid move was found
+    """
     # TODO: this function sucks
     attempt_counter = 0
 
     while True:
-
         # Randomly choose a piece
         piece_i = random.randint(0, len(player.piece_list) - 1)
         piece = player.piece_list[piece_i]
@@ -340,12 +367,12 @@ def play_move(player, grid, start, turn_2):
 
         # Check that the piece is not hanging
         if (spot_bool is True) and (adjacent_bool is True):
-            nothanging_bool = check_nothanging(grid.grid, layer, player.number)
+            supported_bool = check_supported(grid.grid, layer, player.number)
         else:
-            nothanging_bool = False
+            supported_bool = False
 
         # Make that play if it is legal
-        if (spot_bool is True) and (adjacent_bool is True) and (nothanging_bool is True):
+        if (spot_bool is True) and (adjacent_bool is True) and (supported_bool is True):
             grid.grid += layer
             del player.piece_list[piece_i]
             piece_name = player.piece_names_list.pop(piece_i)
@@ -360,56 +387,82 @@ def play_move(player, grid, start, turn_2):
 
 
 def human_move(player_turn, players, grid, piece_i):
+    """Play the human's move.
+
+    Parameters
+    ----------
+    player_turn : string
+        The current player.
+    players : dictionary
+        Dictionary of Competitor objects.
+    grid : Board
+        The current game's Board.
+    piece_i : string
+        The name of the piece being played.
+
+    Returns
+    -------
+    dictionary
+        Updated dictionary of Competitor objects
+    Board
+        Updated Board object
+    """
+    # Grab the current player's object
     print(f'Human move for player {player_turn}')
     player = players[player_turn]
 
+    # Remove selected piece from available list
     piece_i = player.piece_names_list.index(piece_i)
     piece = player.piece_list.pop(piece_i)
     piece_name = player.piece_names_list.pop(piece_i)
 
+    # Orient the piece as chosen and make the move
     x, y, z, rot_x, rot_y, rot_z = player.piece_profile_positions
-    piece = orient2(piece, rot_x, rot_y, rot_z)
-    layer = fill_out2(piece, grid.grid, x, y, z)
+    piece = orient(piece, rot_x, rot_y, rot_z)
+    layer = fill_out(piece, grid.grid, x, y, z)
     grid.grid += layer
+
+    # Create the figure for each orientation of the board
     title_string = f'Player {player_turn} Turn {player.turn}: {piece_name}'
-    ax = grid.draw_board(title_string, players=players)
-    ax_90 = grid.draw_board(title_string, rotation=2, players=players)
-    ax_180 = grid.draw_board(title_string, rotation=1, players=players)
-    ax_270 = grid.draw_board(title_string, rotation=0, players=players)
-
-    ax.figure.savefig('static//test_0.png', format='png')
-    ax_90.figure.savefig('static//test_90.png', format='png')
-    ax_180.figure.savefig('static//test_180.png', format='png')
-    ax_270.figure.savefig('static//test_270.png', format='png')
-
+    create_figures(title_string, players, grid)
     plt.close('all')
 
     return players, grid
 
 
-def orient(piece):
-    k1 = random.randint(0, 3)
-    k2 = random.randint(0, 3)
-    k3 = random.randint(0, 3)
+def orient(piece, k1=None, k2=None, k3=None):
+    """Returns the (randomly) rotated piece."""
+    # Randomly orient the piece if no orientation is given
+    if k1 is None:
+        k1 = random.randint(0, 3)
+    if k2 is None:
+        k2 = random.randint(0, 3)
+    if k3 is None:
+        k3 = random.randint(0, 3)
+
     return np.rot90(np.rot90(np.rot90(piece, k=k1, axes=(0, 1)), k=k2, axes=(1, 2)), k=k3, axes=(0, 2))
 
 
-def orient2(piece, k1, k2, k3):
-    return np.rot90(np.rot90(np.rot90(piece, k=k1, axes=(0, 1)), k=k2, axes=(1, 2)), k=k3, axes=(0, 2))
-
-
-def fill_out(piece, grid):
+def fill_out(piece, grid, row_start=None, col_start=None, stack_start=None):
+    """Returns the (randomly) translated piece."""
+    # Grab the dimensions of the piece and board
     n_layers, n_rows, n_columns = grid.shape
     stacks, rows, cols = piece.shape
 
+    # Calculate the limits of where the piece can be played
     stack_max_start = n_layers - stacks
     row_max_start = n_rows - rows
     col_max_start = n_columns - cols
 
-    stack_start = random.randint(0, stack_max_start)
-    row_start = random.randint(0, row_max_start)
-    col_start = random.randint(0, col_max_start)
+    # Randomly place the piece if no position is given
+    if stack_start is None:
+        stack_start = random.randint(0, stack_max_start)
+    if row_start is None:
+        row_start = random.randint(0, row_max_start)
+    if col_start is None:
+        col_start = random.randint(0, col_max_start)
 
+    # Calculate the left/right padding needed for each axis
     stack_top_pad = stack_start
     stack_bottom_pad = stack_max_start - stack_start
     row_top_pad = row_start
@@ -421,31 +474,13 @@ def fill_out(piece, grid):
                   ((stack_top_pad, stack_bottom_pad), (row_top_pad, row_bottom_pad), (col_left_pad, col_right_pad)))
 
 
-def fill_out2(piece, grid, row, col, stack):
-    n_layers, n_rows, n_columns = grid.shape
-    stacks, rows, cols = piece.shape
-
-    stack_max_start = n_layers - stacks
-    row_max_start = n_rows - rows
-    col_max_start = n_columns - cols
-
-    stack_top_pad = stack
-    stack_bottom_pad = stack_max_start - stack
-    row_top_pad = row
-    row_bottom_pad = row_max_start - row
-    col_left_pad = col
-    col_right_pad = col_max_start - col
-
-    return np.pad(piece,
-                  ((stack_top_pad, stack_bottom_pad), (row_top_pad, row_bottom_pad), (col_left_pad, col_right_pad)))
-
-
 def start_game(
     board_name,
     check1, check2, check3, check4,
     cphuman1, cphuman2, cphuman3, cphuman4,
     color1, color2, color3, color4
 ):
+    """Start the game."""
     # Create each player object, store in a dict
     p1 = Competitor(cphuman1, 1, color1)
     players = {'1': p1}
@@ -460,9 +495,9 @@ def start_game(
         players['4'] = p4
 
     # Create grid object
-    grid = board(board_name)
+    grid = Board(board_name)
 
-    # Draw first humans pieces
+    # Draw first human's pieces
     try:
         if p1.owner == 'human':
             p1.draw_pieces(grid, players)
@@ -479,7 +514,7 @@ def start_game(
 
 
 def play_turn(turn, players, grid):
-
+    """Play a turn."""
     # Figure out whose turn it is and get their available pieces
     num_players = len(players)
     player_num = (turn % num_players) + 1
@@ -496,30 +531,30 @@ def play_turn(turn, players, grid):
         grid, piece_name = play_move(player, grid, start, turn_2)
         if piece_name is None:
             title_string = f'Player {player_num} Maxed Out Attempts'
-            ax = grid.draw_board(title_string, players=players)
-            ax_90 = grid.draw_board(title_string, rotation=2, players=players)
-            ax_180 = grid.draw_board(title_string, rotation=1, players=players)
-            ax_270 = grid.draw_board(title_string, rotation=0, players=players)
+            create_figures(title_string, players, grid)
         else:
             title_string = f'Player {player_num} Turn {turn + 1}: {piece_name}'
-            ax = grid.draw_board(title_string, players=players)
-            ax_90 = grid.draw_board(title_string, rotation=2, players=players)
-            ax_180 = grid.draw_board(title_string, rotation=1, players=players)
-            ax_270 = grid.draw_board(title_string, rotation=0, players=players)
+            create_figures(title_string, players, grid)
     if (player.still_playing is True) and (len(player.piece_list)) == 0:
         title_string = f'Player {player_num} Out of Pieces'
-        ax = grid.draw_board(title_string, players=players)
-        ax_90 = grid.draw_board(title_string, rotation=2, players=players)
-        ax_180 = grid.draw_board(title_string, rotation=1, players=players)
-        ax_270 = grid.draw_board(title_string, rotation=0, players=players)
+        create_figures(title_string, players, grid)
         player.still_playing = False
-
-    ax.figure.savefig('static//test_0.png', format='png')
-    ax_90.figure.savefig('static//test_90.png', format='png')
-    ax_180.figure.savefig('static//test_180.png', format='png')
-    ax_270.figure.savefig('static//test_270.png', format='png')
 
     plt.close('all')
 
     return players, grid
 
+
+def create_figures(title_string, players, grid):
+    """Create and save figures for each rotation of the board."""
+    # Create figures
+    ax = grid.draw_board(title_string, players=players)
+    ax_90 = grid.draw_board(title_string, rotation=2, players=players)
+    ax_180 = grid.draw_board(title_string, rotation=1, players=players)
+    ax_270 = grid.draw_board(title_string, rotation=0, players=players)
+
+    # Save figures
+    ax.figure.savefig('static//board_0.png', format='png')
+    ax_90.figure.savefig('static//board_90.png', format='png')
+    ax_180.figure.savefig('static//board_180.png', format='png')
+    ax_270.figure.savefig('static//board_270.png', format='png')

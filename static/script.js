@@ -66,7 +66,7 @@ function nextTurn() {
 
         var timestamp = new Date().getTime();
         var image = document.getElementById("gameBoard");
-        image.src = `static/test_0.png?t=${timestamp}`
+        image.src = `static/board_0.png?t=${timestamp}`
 
         // loop through pieces returned and display each one
         const pieces = ['4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR']
@@ -109,15 +109,24 @@ function nextTurn_human(evt) {
         document.getElementById('output').innerHTML = `Turns: ${data.turn}`;
         var timestamp = new Date().getTime();
         var image = document.getElementById("gameBoard");
-        image.src = `static/test_0.png?t=${timestamp}`
+        image.src = `static/board_0.png?t=${timestamp}`
 
         // loop through pieces returned and display each one
         const pieces = ['4x1', '3x1', '2x1', 'L', 'square', 'corner', 'pipe', 'bend', 'archer', 'twistL', 'twistR']
-        // const pieces = data['piece_list']
+        const remaining_pieces = data['piece_list']
         for (const piece of pieces) {
             var image = document.getElementById(piece);
             image.src = `static/${piece}.png?t=${timestamp}`
-        }
+            if (remaining_pieces.includes(piece)) {
+                // console.log(document.getElementById(`next_turn_${piece}`));
+                console.log('UNUSED')
+                document.getElementById(`next_turn_${piece}`).style.display = 'inherit';
+                // style="text-align: center;"
+            } else {
+                console.log('DISPLAY NONE');
+                document.getElementById(`next_turn_${piece}`).style.display = 'none';
+            }
+        };
     });
 }
 
@@ -201,6 +210,6 @@ function reset_pieces() {
         for (const piece of pieces) {
             var image = document.getElementById(piece);
             image.src = `static/${piece}.png?t=${timestamp}`
-        }
+        };
     });
 }

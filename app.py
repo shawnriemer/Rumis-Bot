@@ -10,8 +10,9 @@ app.secret_key = '234897f134951'  # Required to use session
 def hello():
     session.clear()
     session['turn'] = 0
+
+    # Retrieve attributes for each player and the board
     if request.method == "POST":
-        # Retrieve attributes for each player and the board
         check1 = True if request.form.get("check1") == 'on' else False
         check2 = True if request.form.get("check2") == 'on' else False
         check3 = True if request.form.get("check3") == 'on' else False
@@ -34,7 +35,9 @@ def hello():
             color1, color2, color3, color4
         )
 
-        # TODO: Draw blank board
+        # Draw new game board
+        ax = grid.draw_board('New Game', players=players)
+        ax.figure.savefig('static//board_0.png', format='png')
 
         # Save game's data
         session['players'] = jsonpickle.encode(players)
@@ -43,18 +46,22 @@ def hello():
     return render_template('index.html')
 
 
-@app.route('/nextturn', methods=['POST'])
-def nextTurn():
+@app.route('/nextturn', methods=['GET', 'POST'])
+def next_turn():
+    # Read in the data provided by JavaScript
     data = request.get_json()  # retrieve the data sent from JavaScript
     print(f"Turn: {session['turn']}")
 
+    # Grab the player and board objects
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
 
+    # Calculate whose turn it is and whose turn is next
     player_turn = str((session['turn'] % len(players)) + 1)
     next_player_turn = str(((session['turn'] + 1) % len(players)) + 1)
     print(f"Player {player_turn}'s turn, next turn: {next_player_turn} (# players: {len(players)})")
 
+    # Call the appropriate function based on the player type
     if players[player_turn].owner == 'cp':
         players, grid = play_turn(session['turn'], players, grid)
     elif players[player_turn].owner == 'human':
@@ -64,6 +71,7 @@ def nextTurn():
     for player in players.values():
         player.piece_profile_positions = (0, 0, 0, 0, 0, 0)
 
+    # Draw the piece previews for the next player's turn
     players[player_turn].turn += 1
     players[next_player_turn].draw_pieces(grid, players)
 
@@ -77,16 +85,24 @@ def nextTurn():
 
 @app.route('/movePiece', methods=['POST'])
 def move_piece():
+    # Read in the data provided by JavaScript
     print('app.py move_piece()')
     data = request.get_json()
+
+    # Grab the player and board objects
     players = jsonpickle.decode(session['players'])
     grid = jsonpickle.decode(session['grid'])
+
+    # Calculate whose turn it is and whose turn is next
     player_turn = str((session['turn'] % len(players)) + 1)
     next_player_turn = str(((session['turn'] + 1) % len(players)) + 1)
     move = data['move']
 
+    # Grab the current orientation of the player's piece previews
     player = players[player_turn]
     current_x, current_y, current_z, rot_x, rot_y, rot_z = player.piece_profile_positions
+
+    # Translate or rotate the piece previews based on the selection
     if move == 'right':
         player.piece_profile_positions = (current_x + 1, current_y, current_z, rot_x, rot_y, rot_z)
         players[player_turn].draw_pieces(grid, players, current_x + 1, current_y, current_z, rot_x, rot_y, rot_z)
@@ -115,6 +131,7 @@ def move_piece():
         player.piece_profile_positions = (current_x, current_y, current_z, rot_x, rot_y + 1, rot_z)
         players[player_turn].draw_pieces(grid, players, current_x, current_y, current_z, rot_x, rot_y + 1, rot_z)
 
+    # Save game's data
     session['players'] = jsonpickle.encode(players)
 
     return jsonify({'piece_list': players[next_player_turn].piece_names_list})  # return the result to JavaScript
